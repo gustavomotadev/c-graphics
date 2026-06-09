@@ -1,0 +1,11 @@
+# Ignore compiled executables
+*.exe
+
+# Ignore dynamic libraries
+*.dll
+*.so
+*.dylib
+
+# Ignore build artifacts
+*.o
+*.obj
