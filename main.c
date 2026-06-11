@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
 #define BACKGROUND_COLOR 0x202020ff
 
 // custom pixel buffer (the canvas)
@@ -31,7 +31,8 @@ typedef struct time_state {
     double delta_time; 
     double avg_fps;
     double ms_per_frame;
-    bool update_fps_flag;
+    bool one_second_flag;
+    double total_time;
 } time_state;
 
 // Helper function to clear the buffer with a single color
@@ -116,7 +117,8 @@ void setup_time_state(time_state* t_state) {
     t_state->frequency = SDL_GetPerformanceFrequency();
     t_state->fps_timer = 0.0;
     t_state->frame_count = 0;
-    t_state->update_fps_flag = false;
+    t_state->one_second_flag = false;
+    t_state->total_time = 0.0;
 }
 
 void update_time_state(time_state* t_state) {
@@ -125,6 +127,9 @@ void update_time_state(time_state* t_state) {
     t_state->current_time = SDL_GetPerformanceCounter();
     t_state->delta_time = (double)(t_state->current_time - t_state->last_time) / (double)t_state->frequency;
     t_state->last_time = t_state->current_time;
+
+    // accumulate time for total time
+    t_state->total_time += t_state->delta_time;
 
     // accumulate time for the FPS display
     t_state->fps_timer += t_state->delta_time;
@@ -140,7 +145,7 @@ void update_time_state(time_state* t_state) {
         t_state->frame_count = 0;
 
         // set flag for fps update
-        t_state->update_fps_flag = true;
+        t_state->one_second_flag = true;
     }
 }
 
@@ -164,10 +169,35 @@ void clear_frame(pixel_buffer* p_buffer) {
     clear_color_buffer(p_buffer, 0x202020FF);
 }
 
-void draw_frame(pixel_buffer* p_buffer) {
+void draw_frame(pixel_buffer* p_buffer, double delta_time, double total_time) {
 
-    // For now, let's just draw a single yellow point in the center of the screen
-    draw_pixel_safe(p_buffer, p_buffer->width / 2, p_buffer->height / 2, 0xFFFF00FF);
+    // x-n*y, where n is the quotient of x/y truncated toward zero to an integer
+    double speed_factor = 5.0;
+    double value = (total_time - ((int) (total_time/speed_factor))*speed_factor)/speed_factor;
+    printf("\ranimation time = %f", value);
+    value = ((value - 0.5)*2.0);
+    if (value < 0.0) {
+        value *= -1.0;
+    }
+    value = 1.0 - value;
+    int square_size = 75 + (value)*25;
+
+    for (int x = 0; x < p_buffer->width; x++)
+    {
+        for (int y = 0; y < p_buffer->height; y++)
+        {
+            if (((x+(int)(value*300.0))/square_size)%2 ^ ((y+(int)(value*200.0))/square_size)%2) 
+            {
+                draw_pixel_safe(p_buffer, x, y, 0xFF0000FF);
+            }
+            else 
+            {
+                draw_pixel_safe(p_buffer, x, y, 0x000000FF);
+            }
+        }
+        
+    }
+
 }
 
 bool present_frame(sdl_pointers* sdlp, pixel_buffer* p_buffer) {
@@ -195,13 +225,13 @@ bool present_frame(sdl_pointers* sdlp, pixel_buffer* p_buffer) {
     return true;
 }
 
-bool frame_loop(sdl_pointers* sdlp, pixel_buffer* p_buffer) {
+bool frame_loop(sdl_pointers* sdlp, pixel_buffer* p_buffer, time_state* t_state) {
 
     // --- PHASE 1: CLEAR THE CANVAS ---
     clear_frame(p_buffer);
 
     // --- PHASE 2: GRAPHICS ALGORITHMS ---
-    draw_frame(p_buffer);
+    draw_frame(p_buffer, t_state->delta_time, t_state->total_time);
 
     // --- PHASE 3: PRESENTATION ---
     return present_frame(sdlp, p_buffer);
@@ -244,10 +274,14 @@ int main(int argc, char* argv[]) {
 
         update_time_state(&t_state);
 
-        if (t_state.update_fps_flag) {
+        if (t_state.one_second_flag) {
             if (!update_title(&sdlp, title_buffer, sizeof(title_buffer), &t_state)) {
                 return 1;
             }
+
+            printf("\nFLAG!\n");
+
+            t_state.one_second_flag = false;
         }
 
         // Handle Inputs
@@ -255,7 +289,7 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_EVENT_QUIT) running = 0;
         }
 
-        frame_loop(&sdlp, &p_buffer);
+        frame_loop(&sdlp, &p_buffer, &t_state);
     }
 
     clean_up_before_exit(&sdlp, &p_buffer);
