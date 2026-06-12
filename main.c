@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "graphics.h"
-#include "scenes.h"
+#include "graphics_module.h"
+#include "custom_scenes.h"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -139,7 +139,8 @@ void clear_frame(pixel_buffer* p_buffer) {
 void draw_frame(pixel_buffer* p_buffer, double delta_time, double total_time) {
 
     // call scene function
-    checkered_board_animation(p_buffer, delta_time, total_time);
+    // checkered_board_animation(p_buffer, delta_time, total_time);
+    lines_dda_triangle(p_buffer, delta_time, total_time);
 
 }
 

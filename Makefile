@@ -7,7 +7,7 @@ CFLAGS = -Wall -std=c11 $(SDL_INC)
 LDFLAGS = $(SDL_LIB) -lSDL3
 
 # Source files
-SRCS = main.c graphics.c math.c scenes.c
+SRCS = main.c graphics_module.c math_module.c custom_scenes.c
 
 # Build Target
 all:
