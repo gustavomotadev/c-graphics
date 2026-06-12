@@ -6,6 +6,9 @@ SDL_LIB = -LC:/deps/SDL3/lib
 CFLAGS = -Wall -std=c11 $(SDL_INC)
 LDFLAGS = $(SDL_LIB) -lSDL3
 
+# Source files
+SRCS = main.c graphics.c math.c scenes.c
+
 # Build Target
 all:
-	gcc main.c -o main.exe $(CFLAGS) $(LDFLAGS)
+	gcc $(SRCS) -o main.exe $(CFLAGS) $(LDFLAGS)

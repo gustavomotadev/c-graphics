@@ -4,16 +4,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
-#define BACKGROUND_COLOR 0x202020ff
+#include "graphics.h"
+#include "scenes.h"
 
-// custom pixel buffer (the canvas)
-typedef struct pixel_buffer {
-    int width;
-    int height;
-    uint32_t* color_buffer;
-} pixel_buffer;
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+#define BACKGROUND_COLOR 0x202020ff
 
 typedef struct sdl_pointers {
     SDL_Window* window;
@@ -35,23 +31,6 @@ typedef struct time_state {
     double total_time;
 } time_state;
 
-// Helper function to clear the buffer with a single color
-void clear_color_buffer(pixel_buffer* p_buffer, uint32_t color) {
-    for (int i = 0; i < p_buffer->width * p_buffer->height; i++) {
-        p_buffer->color_buffer[i] = color;
-    }
-}
-
-// Helper function to draw a single point
-void draw_pixel_safe(pixel_buffer* pBuffer, int x, int y, uint32_t color) {
-    // Prevent out-of-bounds memory writes (bounds checking)
-    if (x >= 0 && x < pBuffer->width && y >= 0 && y < pBuffer->height) {
-        pBuffer->color_buffer[(pBuffer->height - 1 - y) * pBuffer->width + x] = color; 
-        // Note: (SCREEN_HEIGHT - 1 - y) flips the Y axis so (0,0) is at the bottom-left,
-        // which is standard for 3D graphics math.
-    }
-}
-
 bool populate_sdl_pointers(sdl_pointers* sdlp) {
 
     sdlp->window = SDL_CreateWindow("C Graphics", SCREEN_WIDTH, SCREEN_HEIGHT, 0x00);
@@ -62,11 +41,14 @@ bool populate_sdl_pointers(sdl_pointers* sdlp) {
     }
 
     sdlp->renderer = SDL_CreateRenderer(sdlp->window, NULL);
-    if (!sdlp->window) {
+    if (!sdlp->renderer) {
         SDL_Log("Could not create renderer: %s", SDL_GetError());
         SDL_Quit();
         return false;
     }
+
+    // turn on vsync to synchronize present with every vertical refresh
+    SDL_SetRenderVSync(sdlp->renderer, 1);
 
     // Create a streaming texture matching our screen dimensions
     sdlp->texture = SDL_CreateTexture(
@@ -94,21 +76,6 @@ bool sdl_setup(sdl_pointers* sdlp) {
     }
 
     return populate_sdl_pointers(sdlp);
-}
-
-bool setup_pixel_buffer(pixel_buffer* p_buffer, int width, int height) {
-
-    p_buffer->width = width;
-    p_buffer->height = height;
-    // Allocate raw C array
-    p_buffer->color_buffer = (uint32_t*) malloc(width * height * sizeof(uint32_t));
-    if (!p_buffer->color_buffer) {
-        SDL_Log("Could not allocate memory for color buffer.\n");
-        SDL_Quit();
-        return false;
-    }
-
-    return true;
 }
 
 void setup_time_state(time_state* t_state) {
@@ -171,32 +138,8 @@ void clear_frame(pixel_buffer* p_buffer) {
 
 void draw_frame(pixel_buffer* p_buffer, double delta_time, double total_time) {
 
-    // x-n*y, where n is the quotient of x/y truncated toward zero to an integer
-    double speed_factor = 5.0;
-    double value = (total_time - ((int) (total_time/speed_factor))*speed_factor)/speed_factor;
-    printf("\ranimation time = %f", value);
-    value = ((value - 0.5)*2.0);
-    if (value < 0.0) {
-        value *= -1.0;
-    }
-    value = 1.0 - value;
-    int square_size = 75 + (value)*25;
-
-    for (int x = 0; x < p_buffer->width; x++)
-    {
-        for (int y = 0; y < p_buffer->height; y++)
-        {
-            if (((x+(int)(value*300.0))/square_size)%2 ^ ((y+(int)(value*200.0))/square_size)%2) 
-            {
-                draw_pixel_safe(p_buffer, x, y, 0xFF0000FF);
-            }
-            else 
-            {
-                draw_pixel_safe(p_buffer, x, y, 0x000000FF);
-            }
-        }
-        
-    }
+    // call scene function
+    checkered_board_animation(p_buffer, delta_time, total_time);
 
 }
 
@@ -259,6 +202,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (!setup_pixel_buffer(&p_buffer, SCREEN_WIDTH, SCREEN_HEIGHT)) {
+        SDL_Log("Could not allocate memory for color buffer.\n");
+        SDL_Quit();
         return 1;
     }
 
@@ -279,7 +224,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
 
-            printf("\nFLAG!\n");
+            // printf("\nFLAG!\n");
 
             t_state.one_second_flag = false;
         }
