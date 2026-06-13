@@ -83,3 +83,143 @@ void lines_bresenham_all_octants(pixel_buffer* p_buffer, double delta_time, doub
     }
 
 }
+
+void create_test_cube(model* cube) {
+
+    /*
+    # Cube with edges of length 2, centered on the origin
+    # 8 vertices, 12 triangular faces
+
+    # Vertices
+    v -1.0 -1.0  1.0
+    v  1.0 -1.0  1.0
+    v  1.0  1.0  1.0
+    v -1.0  1.0  1.0
+    v -1.0 -1.0 -1.0
+    v  1.0 -1.0 -1.0
+    v  1.0  1.0 -1.0
+    v -1.0  1.0 -1.0
+
+    # Faces (counter-clockwise winding order)
+    # Front
+    f 1 2 3
+    f 1 3 4
+    # Right
+    f 2 6 7
+    f 2 7 3
+    # Back
+    f 6 5 8
+    f 6 8 7
+    # Left
+    f 5 1 4
+    f 5 4 8
+    # Top
+    f 4 3 7
+    f 4 7 8
+    # Bottom
+    f 5 6 2
+    f 5 2 1
+    */
+
+    cube->num_vertexes = 8;
+    cube->num_faces = 12;
+
+    cube->vertexes_3d = (vertex_3d *) malloc(cube->num_vertexes*sizeof(vertex_3d));
+    cube->vertexes_3d_transformed = (vertex_3d *) malloc(cube->num_vertexes*sizeof(vertex_3d));
+    cube->vertexes_2d = (vertex_2d *) malloc(cube->num_vertexes*sizeof(vertex_2d));
+    cube->pixels = (pixel *) malloc(cube->num_vertexes*sizeof(pixel));
+    cube->tri_faces = (triangle_face *) malloc(cube->num_faces*sizeof(triangle_face));
+
+    // 0 -1.0 -1.0  1.0
+    // 1  1.0 -1.0  1.0
+    // 2  1.0  1.0  1.0
+    // 3 -1.0  1.0  1.0
+    // 4 -1.0 -1.0 -1.0
+    // 5  1.0 -1.0 -1.0
+    // 6  1.0  1.0 -1.0
+    // 7 -1.0  1.0 -1.0
+
+    cube->vertexes_3d[0].x = -1.0f;
+    cube->vertexes_3d[0].y = -1.0f;
+    cube->vertexes_3d[0].z = 1.0f;
+    cube->vertexes_3d[1].x = 1.0f;
+    cube->vertexes_3d[1].y = -1.0f;
+    cube->vertexes_3d[1].z = 1.0f;
+    cube->vertexes_3d[2].x = 1.0f;
+    cube->vertexes_3d[2].y = 1.0f;
+    cube->vertexes_3d[2].z = 1.0f;
+    cube->vertexes_3d[3].x = -1.0f;
+    cube->vertexes_3d[3].y = 1.0f;
+    cube->vertexes_3d[3].z = 1.0f;
+    cube->vertexes_3d[4].x = -1.0f;
+    cube->vertexes_3d[4].y = -1.0f;
+    cube->vertexes_3d[4].z = -1.0f;
+    cube->vertexes_3d[5].x = 1.0f;
+    cube->vertexes_3d[5].y = -1.0f;
+    cube->vertexes_3d[5].z = -1.0f;
+    cube->vertexes_3d[6].x = 1.0f;
+    cube->vertexes_3d[6].y = 1.0f;
+    cube->vertexes_3d[6].z = -1.0f;
+    cube->vertexes_3d[7].x = -1.0f;
+    cube->vertexes_3d[7].y = 1.0f;
+    cube->vertexes_3d[7].z = -1.0f;
+
+    // 0 0 1 2
+    // 1 0 2 3
+    // 2 1 5 6
+    // 3 1 6 2
+    // 4 5 4 7
+    // 5 5 7 6
+    // 6 4 0 3
+    // 7 4 3 7
+    // 8 3 2 6
+    // 9 3 6 7
+    // 10 4 5 1
+    // 11 4 1 0
+
+    cube->tri_faces[0].a = 0;
+    cube->tri_faces[0].b = 1;
+    cube->tri_faces[0].c = 2;
+    cube->tri_faces[1].a = 0;
+    cube->tri_faces[1].b = 2;
+    cube->tri_faces[1].c = 3;
+    cube->tri_faces[2].a = 1;
+    cube->tri_faces[2].b = 5;
+    cube->tri_faces[2].c = 6;
+    cube->tri_faces[3].a = 1;
+    cube->tri_faces[3].b = 6;
+    cube->tri_faces[3].c = 2;
+    cube->tri_faces[4].a = 5;
+    cube->tri_faces[4].b = 4;
+    cube->tri_faces[4].c = 7;
+    cube->tri_faces[5].a = 5;
+    cube->tri_faces[5].b = 7;
+    cube->tri_faces[5].c = 6;
+    cube->tri_faces[6].a = 4;
+    cube->tri_faces[6].b = 0;
+    cube->tri_faces[6].c = 3;
+    cube->tri_faces[7].a = 4;
+    cube->tri_faces[7].b = 3;
+    cube->tri_faces[7].c = 7;
+    cube->tri_faces[8].a = 3;
+    cube->tri_faces[8].b = 2;
+    cube->tri_faces[8].c = 6;
+    cube->tri_faces[9].a = 3;
+    cube->tri_faces[9].b = 6;
+    cube->tri_faces[9].c = 7;
+    cube->tri_faces[10].a = 4;
+    cube->tri_faces[10].b = 5;
+    cube->tri_faces[10].c = 1;
+    cube->tri_faces[11].a = 4;
+    cube->tri_faces[11].b = 1;
+    cube->tri_faces[11].c = 0;
+}
+
+void orthographic_cube(pixel_buffer* p_buffer, double delta_time, double total_time) {
+
+    model cube;
+
+    create_test_cube(&cube);
+
+    draw_model_wireframe(p_buffer, &cube, orthographic_projection, 0x00FF00FF);
+}

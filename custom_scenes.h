@@ -1,5 +1,5 @@
-#ifndef SCENES_H
-#define SCENES_H
+#ifndef SCENES_MODULE_H
+#define SCENES_MODULE_H
 
 #include <stdlib.h>
 
@@ -11,4 +11,6 @@ void lines_dda_triangle(pixel_buffer* p_buffer, double delta_time, double total_
 
 void lines_bresenham_all_octants(pixel_buffer* p_buffer, double delta_time, double total_time);
 
-#endif // SCENES_H
+void orthographic_cube(pixel_buffer* p_buffer, double delta_time, double total_time);
+
+#endif // SCENES_MODULE_H

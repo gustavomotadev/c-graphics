@@ -195,3 +195,33 @@ void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2,
         }
     }
 }
+
+void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color) {
+
+    for (int i = 0; i < md->num_vertexes; i++)
+    {
+        md->vertexes_2d[i] = project(md->vertexes_3d[i]);
+        // printf("[%i] %.2f %.2f\n", i, md->vertexes_2d[i].x, md->vertexes_2d[i].y);
+        md->pixels[i] = round_vector_2d(md->vertexes_2d[i]);
+        // printf("[%i] %i %i\n", i, md->pixels[i].x, md->pixels[i].y);
+    }
+
+    for (int i = 0; i < md->num_faces; i++)
+    {
+        int a = md->tri_faces[i].a;
+        int b = md->tri_faces[i].b;
+        int c = md->tri_faces[i].c;
+        int x1 = md->pixels[a].x;
+        int y1 = md->pixels[a].y;
+        int x2 = md->pixels[b].x;
+        int y2 = md->pixels[b].y;
+        int x3 = md->pixels[c].x;
+        int y3 = md->pixels[c].y;
+        
+        draw_line_bresenham(p_buffer, x1, y1, x2, y2, color);
+        draw_line_bresenham(p_buffer, x2, y2, x3, y3, color);
+        draw_line_bresenham(p_buffer, x3, y3, x1, y1, color);
+    }
+    
+    
+}

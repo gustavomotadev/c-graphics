@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_H
-#define GRAPHICS_H
+#ifndef GRAPHICS_MODULE_H
+#define GRAPHICS_MODULE_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -16,6 +16,29 @@ typedef struct pixel_buffer {
     uint32_t* color_buffer;
 } pixel_buffer;
 
+typedef struct triangle_face {
+    int a;
+    int b;
+    int c;
+} triangle_face;
+
+typedef vector_3d vertex_3d;
+typedef vector_2d vertex_2d;
+typedef vector_2d_int pixel;
+
+typedef struct model {
+    vertex_3d* vertexes_3d;
+    int num_vertexes;
+    vertex_3d* vertexes_3d_transformed;
+    vertex_2d* vertexes_2d;
+    pixel* pixels;
+    triangle_face* tri_faces;
+    int num_faces;
+} model;
+
+//function pointer that accepts functions with a signature of receiving vector_3d and returning vector_2d
+typedef vector_2d (*projection_function)(vector_3d);
+
 bool setup_pixel_buffer(pixel_buffer* p_buffer, int width, int height);
 
 // clear the buffer with a single color
@@ -30,4 +53,6 @@ void draw_line_dda(pixel_buffer* p_buffer, float x1, float y1, float x2, float y
 // draw a single line using bresenham
 void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color);
 
-#endif // GRAPHICS_H
+void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color);
+
+#endif // GRAPHICS_MODULE_H
