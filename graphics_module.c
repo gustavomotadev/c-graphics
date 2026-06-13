@@ -206,6 +206,8 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
         // printf("[%i] %i %i\n", i, md->pixels[i].x, md->pixels[i].y);
     }
 
+    // color = 0x000000FF;
+
     for (int i = 0; i < md->num_faces; i++)
     {
         int a = md->tri_faces[i].a;
@@ -219,8 +221,11 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
         int y3 = md->pixels[c].y;
         
         draw_line_bresenham(p_buffer, x1, y1, x2, y2, color);
+        // color += 0x00000A00;
         draw_line_bresenham(p_buffer, x2, y2, x3, y3, color);
+        // color += 0x00000A00;
         draw_line_bresenham(p_buffer, x3, y3, x1, y1, color);
+        // color += 0x14141400;
     }
     
 }

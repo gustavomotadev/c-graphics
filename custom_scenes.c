@@ -225,9 +225,24 @@ void orthographic_cube(pixel_buffer* p_buffer, double delta_time, double total_t
     create_test_cube(&cube);
 
     reset_model_transform(&cube);
-    rotate_model(&cube, 0, deg90/2.0f, 0.0f);
+    rotate_model(&cube, 0.0f, deg90/2.0f, 0.0f);
     scale_model(&cube, 200.0f, 200.0f, 200.0f);
     translate_model(&cube, p_buffer->width/2.0f, p_buffer->height/2.0f, 0.0f);
 
     draw_model_wireframe(p_buffer, &cube, orthographic_projection, 0x00FF00FF);
+}
+
+void isometric_cube(pixel_buffer* p_buffer, double delta_time, double total_time) {
+
+    model cube;
+    // float deg90 = 3.14159265358979323846f/2.0f;
+
+    create_test_cube(&cube);
+
+    reset_model_transform(&cube);
+    // rotate_model(&cube, deg90/2.0f, deg90/3.0f, deg90/3.0f);
+    scale_model(&cube, 100.0f, 100.0f, 100.0f);
+    translate_model(&cube, 600.0f, 600.0f, 0.0f);
+
+    draw_model_wireframe(p_buffer, &cube, isometric_projection, 0x00FF00FF);
 }

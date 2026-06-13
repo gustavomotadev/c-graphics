@@ -29,4 +29,6 @@ void rotate_vector_3d(vector_3d* v3d, float angle_x, float angle_y, float angle_
 
 void translate_vector_3d(vector_3d* v3d, float dx, float dy, float dz);
 
+vector_2d isometric_projection(vector_3d v3d);
+
 #endif // MATH_MODULE_H

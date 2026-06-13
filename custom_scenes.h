@@ -13,4 +13,6 @@ void lines_bresenham_all_octants(pixel_buffer* p_buffer, double delta_time, doub
 
 void orthographic_cube(pixel_buffer* p_buffer, double delta_time, double total_time);
 
+void isometric_cube(pixel_buffer* p_buffer, double delta_time, double total_time);
+
 #endif // SCENES_MODULE_H
