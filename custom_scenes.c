@@ -69,12 +69,17 @@ void lines_dda_triangle(pixel_buffer* p_buffer, double delta_time, double total_
     draw_line_dda(p_buffer, x3, y3, x1, y1, 0x0000FFFF);
 }
 
-void lines_bresenham_triangle(pixel_buffer* p_buffer, double delta_time, double total_time) {
+void lines_bresenham_all_octants(pixel_buffer* p_buffer, double delta_time, double total_time) {
 
     int x_center = p_buffer->width>>1;
     int y_center = p_buffer->height>>1;
 
-    draw_line_bresenham(p_buffer, x_center, y_center, x_center+200, y_center+50, 0xFF0000FF);
-    draw_line_bresenham(p_buffer, x_center, y_center, x_center+200, y_center-50, 0xFF0000FF);
+    for (int x = -200; x <= 200; x+=25)
+    {
+            for (int y = -200; y <= 200; y+=25)
+        {
+            draw_line_bresenham(p_buffer, x_center, y_center, x_center+x, y_center+y, 0xFF0000FF);
+        }
+    }
 
 }

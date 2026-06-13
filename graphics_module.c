@@ -57,7 +57,7 @@ void draw_line_dda(pixel_buffer* p_buffer, float x1, float y1, float x2, float y
     
 }
 
-void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color) {
+void draw_line_bresenham_shallow(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color) {
 
     //REMEMBER: MULTIPLICATION BY 2 TURNS INTO LEFT SHIFT BY 1
 
@@ -101,4 +101,97 @@ void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2,
         }
     }
     
+}
+
+void draw_line_bresenham_steep(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color) {
+
+    //REMEMBER: MULTIPLICATION BY 2 TURNS INTO LEFT SHIFT BY 1
+
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+
+    // adjustment for the case of negative slope
+    int x_step = 1;
+    if (dx < 0) {
+
+        x_step = -1;
+        dx = -dx;
+    }
+
+    int two_dx = dx << 1;
+    //initial decision parameter p0
+    int decision_parameter = (two_dx) - dy;
+    //initial y that will either be mantained or changed by 1 every iteration
+    int x = x1;
+
+    int dp_step_change = (dx - dy) << 1;
+    int dp_step_mantain = two_dx;
+
+    for (int y = y1; y <= y2; y++) {
+        
+        draw_pixel(p_buffer, x, y, color);
+
+        //decision parameter is calculated from 2 distances between actual point and upper pixel and lower pixel
+        if (decision_parameter > 0) {
+
+            // y changed (adjusted for negative slope)
+            x += x_step;
+            // decision parameter updates
+            decision_parameter += dp_step_change;
+
+        } else {
+
+            // y does not change
+            // decision parameter updates
+            decision_parameter += dp_step_mantain;
+        }
+    }
+    
+}
+
+void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color) {
+
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    int abs_dx = dx;
+    int abs_dy = dy;
+    
+    // printf("dx: %i\tdy: %i\n", dx, dy);
+    if (dx < 0) {
+        abs_dx = -dx;
+    }
+    
+    if (dy < 0) {
+        abs_dy = -dy;
+    }
+    // printf("abs_dx: %i\tabs_dy: %i\n", abs_dx, abs_dy);
+    
+    if (abs_dy > abs_dx) {
+
+        // steep case
+        // printf("steep\n");
+        // ensure y1 and y2 are properly ordered
+        if (y2 > y1) {
+
+            draw_line_bresenham_steep(p_buffer, x1, y1, x2, y2, color);
+
+        } else {
+
+            draw_line_bresenham_steep(p_buffer, x2, y2, x1, y1, color);
+        }
+        
+    } else {
+        
+        // shallow case
+        // printf("shallow\n");
+        // ensure x1 and x2 are properly ordered
+        if (x2 > x1) {
+
+            draw_line_bresenham_shallow(p_buffer, x1, y1, x2, y2, color);
+
+        } else {
+
+            draw_line_bresenham_shallow(p_buffer, x2, y2, x1, y1, color);
+        }
+    }
 }
