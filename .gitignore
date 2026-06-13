@@ -12,3 +12,6 @@
 
 # Ignore pure text
 *.txt
+
+# Ignore python scripts
+*.py

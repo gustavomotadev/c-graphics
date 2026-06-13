@@ -144,7 +144,8 @@ void draw_frame(pixel_buffer* p_buffer, double delta_time, double total_time) {
     // lines_bresenham_all_octants(p_buffer, delta_time, total_time);
     // orthographic_cube(p_buffer, delta_time, total_time);
     // isometric_cube(p_buffer, delta_time, total_time);
-    simplified_perspective_cube(p_buffer, delta_time, total_time);
+    // simplified_perspective_cube(p_buffer, delta_time, total_time);
+    simplified_perspective_teapot(p_buffer, delta_time, total_time);
 
 }
 
