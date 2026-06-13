@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "math_module.h"
 
@@ -54,5 +55,13 @@ void draw_line_dda(pixel_buffer* p_buffer, float x1, float y1, float x2, float y
 void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color);
 
 void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color);
+
+void scale_model(model* md, float factor_x, float factor_y, float factor_z);
+
+void rotate_model(model* md, float angle_x, float angle_y, float angle_z);
+
+void translate_model(model* md, float dx, float dy, float dz);
+
+void reset_model_transform(model* md);
 
 #endif // GRAPHICS_MODULE_H

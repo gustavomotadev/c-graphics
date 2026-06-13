@@ -200,7 +200,7 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
 
     for (int i = 0; i < md->num_vertexes; i++)
     {
-        md->vertexes_2d[i] = project(md->vertexes_3d[i]);
+        md->vertexes_2d[i] = project(md->vertexes_3d_transformed[i]);
         // printf("[%i] %.2f %.2f\n", i, md->vertexes_2d[i].x, md->vertexes_2d[i].y);
         md->pixels[i] = round_vector_2d(md->vertexes_2d[i]);
         // printf("[%i] %i %i\n", i, md->pixels[i].x, md->pixels[i].y);
@@ -223,5 +223,34 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
         draw_line_bresenham(p_buffer, x3, y3, x1, y1, color);
     }
     
+}
+
+void scale_model(model* md, float factor_x, float factor_y, float factor_z) {
+
+    for (int i = 0; i < md->num_vertexes; i++)
+    {
+        scale_vector_3d(&md->vertexes_3d_transformed[i], factor_x, factor_y, factor_z);
+    }
     
+}
+
+void rotate_model(model* md, float angle_x, float angle_y, float angle_z) {
+
+    for (int i = 0; i < md->num_vertexes; i++)
+    {
+        rotate_vector_3d(&md->vertexes_3d_transformed[i], angle_x, angle_y, angle_z);
+    }
+}
+
+void translate_model(model* md, float dx, float dy, float dz) {
+
+    for (int i = 0; i < md->num_vertexes; i++)
+    {
+        translate_vector_3d(&md->vertexes_3d_transformed[i], dx, dy, dz);
+    }
+}
+
+void reset_model_transform(model* md) {
+
+    memcpy(md->vertexes_3d_transformed, md->vertexes_3d, sizeof(vertex_3d)*md->num_vertexes);
 }

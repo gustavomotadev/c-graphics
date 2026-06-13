@@ -164,6 +164,8 @@ void create_test_cube(model* cube) {
     cube->vertexes_3d[7].y = 1.0f;
     cube->vertexes_3d[7].z = -1.0f;
 
+    reset_model_transform(cube);
+
     // 0 0 1 2
     // 1 0 2 3
     // 2 1 5 6
@@ -218,8 +220,14 @@ void create_test_cube(model* cube) {
 void orthographic_cube(pixel_buffer* p_buffer, double delta_time, double total_time) {
 
     model cube;
+    float deg90 = 3.14159265358979323846f/2.0f;
 
     create_test_cube(&cube);
+
+    reset_model_transform(&cube);
+    rotate_model(&cube, 0, deg90/2.0f, 0.0f);
+    scale_model(&cube, 200.0f, 200.0f, 200.0f);
+    translate_model(&cube, p_buffer->width/2.0f, p_buffer->height/2.0f, 0.0f);
 
     draw_model_wireframe(p_buffer, &cube, orthographic_projection, 0x00FF00FF);
 }
