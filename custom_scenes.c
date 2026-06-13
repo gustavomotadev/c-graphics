@@ -68,3 +68,9 @@ void lines_dda_triangle(pixel_buffer* p_buffer, double delta_time, double total_
     draw_line_dda(p_buffer, x2, y2, x3, y3, 0x00FF00FF);
     draw_line_dda(p_buffer, x3, y3, x1, y1, 0x0000FFFF);
 }
+
+void lines_bresenham_triangle(pixel_buffer* p_buffer, double delta_time, double total_time) {
+
+    draw_line_bresenham(p_buffer, 50, 50, 500, 100, 0xFF0000FF);
+
+}

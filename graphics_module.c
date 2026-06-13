@@ -56,3 +56,40 @@ void draw_line_dda(pixel_buffer* p_buffer, float x1, float y1, float x2, float y
     }
     
 }
+
+void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color) {
+
+    //REMEMBER: MULTIPLICATION BY 2 TURNS INTO LEFT SHIFT BY 1
+
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    int two_dy = dy << 1;
+    //initial decision parameter p0
+    int decision_parameter = (two_dy) - dx;
+    //initial y that will either be mantained or changed by 1 every iteration
+    int y = y1;
+
+    int dp_step_change = (dy - dx) << 1;
+    int dp_step_mantain = two_dy;
+
+    for (int x = x1; x <= x2; x++) {
+        
+        draw_pixel(p_buffer, x, y, color);
+
+        //decision parameter is calculated from 2 distances between actual point and upper pixel and lower pixel
+        if (decision_parameter > 0) {
+
+            // y changed
+            y = y + 1;
+            // decision parameter updates
+            decision_parameter += dp_step_change;
+
+        } else {
+
+            // y does not change
+            // decision parameter updates
+            decision_parameter += dp_step_mantain;
+        }
+    }
+    
+}

@@ -140,7 +140,8 @@ void draw_frame(pixel_buffer* p_buffer, double delta_time, double total_time) {
 
     // call scene function
     // checkered_board_animation(p_buffer, delta_time, total_time);
-    lines_dda_triangle(p_buffer, delta_time, total_time);
+    // lines_dda_triangle(p_buffer, delta_time, total_time);
+    lines_bresenham_triangle(p_buffer, delta_time, total_time);
 
 }
 
