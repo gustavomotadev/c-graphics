@@ -63,6 +63,15 @@ void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2,
 
     int dx = x2 - x1;
     int dy = y2 - y1;
+
+    // adjustment for the case of negative slope
+    int y_step = 1;
+    if (dy < 0) {
+
+        y_step = -1;
+        dy = -dy;
+    }
+
     int two_dy = dy << 1;
     //initial decision parameter p0
     int decision_parameter = (two_dy) - dx;
@@ -79,8 +88,8 @@ void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2,
         //decision parameter is calculated from 2 distances between actual point and upper pixel and lower pixel
         if (decision_parameter > 0) {
 
-            // y changed
-            y = y + 1;
+            // y changed (adjusted for negative slope)
+            y += y_step;
             // decision parameter updates
             decision_parameter += dp_step_change;
 
