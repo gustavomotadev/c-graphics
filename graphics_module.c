@@ -196,11 +196,24 @@ void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2,
     }
 }
 
+vertex_2d viewport_transform(vertex_2d projected, float half_width, float half_height) {
+
+    vertex_2d transformed;
+    
+    transformed.x = (projected.x * half_width) + half_width;
+    transformed.y = (projected.y * half_height) + half_height;
+
+    return transformed;
+}
+
 void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color) {
+
+    float half_width = (float)p_buffer->width / 2.0f;
+    float half_height = (float)p_buffer->height / 2.0f;
 
     for (int i = 0; i < md->num_vertexes; i++)
     {
-        md->vertexes_2d[i] = project(md->vertexes_3d_transformed[i]);
+        md->vertexes_2d[i] = viewport_transform(project(md->vertexes_3d_transformed[i]), half_width, half_height);
         // printf("[%i] %.2f %.2f\n", i, md->vertexes_2d[i].x, md->vertexes_2d[i].y);
         md->pixels[i] = round_vector_2d(md->vertexes_2d[i]);
         // printf("[%i] %i %i\n", i, md->pixels[i].x, md->pixels[i].y);

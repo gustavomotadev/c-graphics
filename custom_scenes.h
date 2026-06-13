@@ -15,4 +15,6 @@ void orthographic_cube(pixel_buffer* p_buffer, double delta_time, double total_t
 
 void isometric_cube(pixel_buffer* p_buffer, double delta_time, double total_time);
 
+void simplified_perspective_cube(pixel_buffer* p_buffer, double delta_time, double total_time);
+
 #endif // SCENES_MODULE_H

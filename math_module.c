@@ -69,7 +69,7 @@ void translate_vector_3d(vector_3d* v3d, float dx, float dy, float dz) {
 
 vector_2d isometric_projection(vector_3d v3d) {
 
-    //this projection is basically two rotations followed by an orthogonal projection
+    // this projection is basically two rotations followed by an orthogonal projection
 
     float sqrt2 = 1.4142135623730950488016887242097f;
     float sqrt6 = 2.4494897427831780981972840747059f;
@@ -78,6 +78,18 @@ vector_2d isometric_projection(vector_3d v3d) {
 
     v2d.x = (v3d.x - v3d.z) / sqrt2;
     v2d.y = ((2*v3d.y) - v3d.x - v3d.z) / sqrt6;
+
+    return v2d;
+}
+
+vector_2d simplified_perspective_projection(vector_3d v3d) {
+
+    // assuming a particular camera position, camera orientation and screen position
+
+    vector_2d v2d;
+
+    v2d.x = v3d.x / v3d.z;
+    v2d.y = v3d.y / v3d.z;
 
     return v2d;
 }

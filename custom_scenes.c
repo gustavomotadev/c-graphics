@@ -8,9 +8,7 @@ void checkered_board_animation(pixel_buffer* p_buffer, double delta_time, double
 
     //larger is slower
     double speed_factor = 5.0;
-
     // turn total time into 0..1 interval
-    // x-n*y, where n is the quotient of x/y truncated toward zero to an integer (fmod)
     double value = (total_time - ((int) (total_time/speed_factor))*speed_factor)/speed_factor;
     
     // turn value from 0..1 to -1..1
@@ -245,4 +243,36 @@ void isometric_cube(pixel_buffer* p_buffer, double delta_time, double total_time
     translate_model(&cube, 600.0f, 600.0f, 0.0f);
 
     draw_model_wireframe(p_buffer, &cube, isometric_projection, 0x00FF00FF);
+}
+
+void simplified_perspective_cube(pixel_buffer* p_buffer, double delta_time, double total_time) {
+
+    model cube;
+    double pi = 3.14159265358979323846f;
+    // float deg90 = 3.14159265358979323846f/2.0f;
+
+    //larger is slower
+    double x_speed_factor = 20.0;
+    double y_speed_factor = 10.0;
+    double z_speed_factor = 40.0;
+    // turn total time into 0..1 interval
+    double x_value = (total_time - ((int) (total_time/x_speed_factor))*x_speed_factor)/x_speed_factor;
+    double y_value = (total_time - ((int) (total_time/y_speed_factor))*y_speed_factor)/y_speed_factor;
+    double z_value = (total_time - ((int) (total_time/z_speed_factor))*z_speed_factor)/z_speed_factor;
+    // turn 0..1 into 0..2pi
+    x_value = x_value*2.0*pi;
+    y_value = y_value*2.0*pi;
+    z_value = z_value*2.0*pi;
+
+    create_test_cube(&cube);
+
+    reset_model_transform(&cube);
+    rotate_model(&cube, x_value, y_value, z_value);
+    // rotate_model(&cube, -x_value, 0.0f, 0.0f);
+    // rotate_model(&cube, 0.0f, 0.0f, -z_value);
+    
+    scale_model(&cube, 0.25f, 0.25f, 0.25f);
+    translate_model(&cube, 0.0f, 0.0f, 1.0f);
+
+    draw_model_wireframe(p_buffer, &cube, simplified_perspective_projection, 0x00FF00FF);
 }

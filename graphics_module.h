@@ -54,6 +54,8 @@ void draw_line_dda(pixel_buffer* p_buffer, float x1, float y1, float x2, float y
 // draw a single line using bresenham
 void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, uint32_t color);
 
+vertex_2d viewport_transform(vertex_2d projected, float half_width, float half_height);
+
 void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color);
 
 void scale_model(model* md, float factor_x, float factor_y, float factor_z);
