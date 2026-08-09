@@ -61,9 +61,15 @@ vertex_2d viewport_transform(vertex_2d projected, float half_width, float half_h
 
 void draw_triangle_wireframe(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
 
+void draw_horizontal_line(pixel_buffer* p_buffer, int x1, int x2, int y, uint32_t color);
+
+void rasterize_triangle_scanline(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+
 void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, draw_triangle_function draw, uint32_t color);
 
 void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color);
+
+void draw_model_scanlines(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color);
 
 void scale_model(model* md, float factor_x, float factor_y, float factor_z);
 

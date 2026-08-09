@@ -20,13 +20,16 @@ void clear_color_buffer(pixel_buffer* p_buffer, uint32_t color) {
     }
 }
 
+int static inline xy_to_p_buffer(pixel_buffer* p_buffer, int x, int y) {
+    // Note: (SCREEN_HEIGHT - 1 - y) flips the Y axis so (0,0) is at the bottom-left, which is standard for 3D graphics math.
+    return (p_buffer->height - 1 - y) * p_buffer->width + x;
+}
+
 // Helper function to draw a single point
 void draw_pixel(pixel_buffer* p_buffer, int x, int y, uint32_t color) {
     // Prevent out-of-bounds memory writes (bounds checking)
     if (x >= 0 && x < p_buffer->width && y >= 0 && y < p_buffer->height) {
-        p_buffer->color_buffer[(p_buffer->height - 1 - y) * p_buffer->width + x] = color; 
-        // Note: (SCREEN_HEIGHT - 1 - y) flips the Y axis so (0,0) is at the bottom-left,
-        // which is standard for 3D graphics math.
+        p_buffer->color_buffer[xy_to_p_buffer(p_buffer, x, y)] = color; 
     }
 }
 
@@ -247,6 +250,10 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
     draw_model(p_buffer, md, project, draw_triangle_wireframe, color);
 }
 
+void draw_model_scanlines(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color) {
+    draw_model(p_buffer, md, project, rasterize_triangle_scanline, color);
+}
+
 void scale_model(model* md, float factor_x, float factor_y, float factor_z) {
 
     for (int i = 0; i < md->num_vertexes; i++)
@@ -275,4 +282,148 @@ void translate_model(model* md, float dx, float dy, float dz) {
 void reset_model_transform(model* md) {
 
     memcpy(md->vertexes_3d_transformed, md->vertexes_3d, sizeof(vertex_3d)*md->num_vertexes);
+}
+
+static inline void swap_vertexes_2d_int(int *x1, int *y1, int *x2, int *y2) {
+    int temp = *x1;
+    *x1 = *x2;
+    *x2 = temp;
+
+    temp = *y1;
+    *y1 = *y2;
+    *y2 = temp;
+}
+
+static inline void swap_int(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void draw_horizontal_line(pixel_buffer* p_buffer, int x1, int x2, int y, uint32_t color) {
+
+    if (y < 0 || y >= p_buffer->height) {
+        return;
+    }
+
+    if (x1 == x2) {
+        draw_pixel(p_buffer, x1, y, color);
+    }
+
+    if (x2 < x1) {
+        swap_int(&x1, &x2);
+    }
+
+    if (x1 < 0) {
+        x1 = 0;
+    }
+
+    if (x2 >= p_buffer->width) {
+        x2 = p_buffer->width - 1;
+    }
+
+    int start = xy_to_p_buffer(p_buffer, x1, y);
+    int end = xy_to_p_buffer(p_buffer, x2, y);
+
+    for (int i = start; i < end; i++) {
+        p_buffer->color_buffer[i] = color;
+    }
+}
+
+// TODO: fix error on negative coordinates or coordinates out of screen
+void rasterize_triangle_scanline(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color) {
+
+    // printf("BEFORE %i %i / %i %i / %i %i\n", x1, y1, x2, y2, x3, y3);
+
+    // order vertexes 1 <= 2 <= 3 by coordinate y
+    if (y1 > y2) swap_vertexes_2d_int(&x1, &y1, &x2, &y2);
+    if (y2 > y3) swap_vertexes_2d_int(&x2, &y2, &x3, &y3);
+    if (y1 > y2) swap_vertexes_2d_int(&x1, &y1, &x2, &y2);
+
+    // printf("AFTER  %i %i / %i %i / %i %i\n", x1, y1, x2, y2, x3, y3);
+
+    // discard zero height triangles
+    if (y1 == y3) return;
+
+    // find fourth point that lies in the longest edge (between p1 and p3) with the same y coordinate as middle height point p2 
+    int y4 = y2;
+    float x4 = x1 + ((x3-x1)*(((float) (y2-y1))/(y3-y1)));
+
+    ///debug
+    // draw_pixel(p_buffer, roundf(x4), y4, 0xFFFF00FF);
+    // draw_pixel(p_buffer, roundf(x4)-1, y4, 0xFFFF00FF);
+    // draw_pixel(p_buffer, roundf(x4)+1, y4, 0xFFFF00FF);
+    // draw_pixel(p_buffer, roundf(x4), y4-1, 0xFFFF00FF);
+    // draw_pixel(p_buffer, roundf(x4), y4+1, 0xFFFF00FF);
+
+    // the line between p2 and p4 is now a horizontal boundary between a flat bottom triangle and a flat top triangle
+    // flat bottom: p1, p2, p4 (apex p1, base p2 and p4)
+    // flat top: p2, p4, p3 (apex p3, base p2 and p4)
+
+    // calculate inverse slope (dx/dy) to find how much x changes for unit increments of y
+
+    float slope_flat_bottom_p1_p2 = ((float)(x2-x1))/(y2-y1);
+    float slope_flat_bottom_p1_p4 = ((float)(x4-x1))/(y4-y1);
+    float slope_flat_top_p2_p3 = ((float)(x3-x2))/(y3-y2);
+    float slope_flat_top_p4_p3 = ((float)(x3-x4))/(y3-y4);
+
+    // check which ones are on the "left" or "right"
+
+    float slope_flat_bottom_left = 0;
+    float slope_flat_bottom_right = 0;
+    float slope_flat_top_left = 0;
+    float slope_flat_top_right = 0;
+
+    int flat_top_left = 0;
+    int flat_top_right = 0;
+
+    if (x2 < x4) {
+
+        // p2 on the "left"
+        slope_flat_bottom_left = slope_flat_bottom_p1_p2;
+        slope_flat_bottom_right = slope_flat_bottom_p1_p4;
+        
+        slope_flat_top_left = slope_flat_top_p2_p3;
+        slope_flat_top_right = slope_flat_top_p4_p3;
+
+        flat_top_left = x2;
+        flat_top_right = x4;
+
+
+    } else {
+
+        // p4 on the "left"
+        slope_flat_bottom_left = slope_flat_bottom_p1_p4;
+        slope_flat_bottom_right = slope_flat_bottom_p1_p2;
+
+        slope_flat_top_left = slope_flat_top_p4_p3;
+        slope_flat_top_right = slope_flat_top_p2_p3;
+
+        flat_top_left = x4;
+        flat_top_right = x2;
+    }
+
+    // loop flat bottom:
+
+    float x_left = x1, x_right = x1;
+
+    for (int y = y1; y <= y2; y++)
+    {
+        // printf("BOTTOM %.1f %.1f\n", x_left, x_right);
+        draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
+        x_left += slope_flat_bottom_left;
+        x_right += slope_flat_bottom_right;
+    }
+    
+    // loop flat top:
+
+    x_left = flat_top_left, x_right = flat_top_right;
+
+    for (int y = y2; y <= y3; y++)
+    {
+        // printf("TOP    %.1f %.1f\n", x_left, x_right);
+        draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
+        x_left += slope_flat_top_left;
+        x_right += slope_flat_top_right;
+    }
 }

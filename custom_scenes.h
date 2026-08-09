@@ -19,4 +19,6 @@ void simplified_perspective_cube(pixel_buffer* p_buffer, double delta_time, doub
 
 void simplified_perspective_teapot(pixel_buffer* p_buffer, double delta_time, double total_time);
 
+void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, double total_time);
+
 #endif // SCENES_MODULE_H

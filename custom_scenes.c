@@ -1456,3 +1456,36 @@ void simplified_perspective_teapot(pixel_buffer* p_buffer, double delta_time, do
 
     draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0x00FF00FF);
 }
+
+void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, double total_time) {
+
+    model teapot;
+    double pi = 3.14159265358979323846f;
+    // float deg90 = 3.14159265358979323846f/2.0f;
+
+    //larger is slower
+    double x_speed_factor = 20.0;
+    double y_speed_factor = 10.0;
+    double z_speed_factor = 40.0;
+    // turn total time into 0..1 interval
+    double x_value = (total_time - ((int) (total_time/x_speed_factor))*x_speed_factor)/x_speed_factor;
+    double y_value = (total_time - ((int) (total_time/y_speed_factor))*y_speed_factor)/y_speed_factor;
+    double z_value = (total_time - ((int) (total_time/z_speed_factor))*z_speed_factor)/z_speed_factor;
+    // turn 0..1 into 0..2pi
+    x_value = x_value*2.0*pi;
+    y_value = y_value*2.0*pi;
+    z_value = z_value*2.0*pi;
+
+    create_teapot(&teapot);
+
+    reset_model_transform(&teapot);
+    rotate_model(&teapot, x_value, y_value, z_value);
+    // rotate_model(&cube, -x_value, 0.0f, 0.0f);
+    // rotate_model(&cube, 0.0f, 0.0f, -z_value);
+    
+    // scale_model(&teapot, 0.8f, 0.8f, 0.8f);
+    translate_model(&teapot, 0.0f, 0.0f, 1.0f);
+
+    draw_model_scanlines(p_buffer, &teapot, simplified_perspective_projection, 0xFF0000FF);
+    draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
+}
