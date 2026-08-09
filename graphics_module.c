@@ -439,9 +439,10 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
     // loop each side
 
     float x_left = 0.0f, x_right = 0.0f;
-    int y_start = 0.0f, y_end = 0.0f;
+    int y_start = 0, y_end = 0;
     float pre_step = 0.0f;
     int count = 0;
+    int x_start = 0, x_end = 0;
 
     // loop flat bottom:
     if (!natural_flat_top) {
@@ -460,12 +461,17 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
             // printf("BOTTOM %.1f %.1f %i\n", x_left, x_right, y);
             // printf("SLOPE  %.1f %.1f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // if (natural_flat_bottom) printf("BOTTOM %.1f %.1f %i\n", x_left, x_right, y);
-            if (ceilf(x_left) < 0 || (int) x_right >= p_buffer->width) {
-                printf("AFTER  %f %f / %f %f / %f %f\n", x1, y1, x2, y2, x3, y3);
-                printf("BOTTOM %f %f %i\n", x_left, x_right, y);
-                printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
+            // if (ceilf(x_left) < 0 || (int) x_right >= p_buffer->width) {
+            //     printf("AFTER  %f %f / %f %f / %f %f\n", x1, y1, x2, y2, x3, y3);
+            //     printf("BOTTOM %f %f %i\n", x_left, x_right, y);
+            //     printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
+            // }
+            x_start = (int) ceilf(x_left);
+            x_end = (int) x_right;
+            // if (x_start > x_end) printf("SWAPPED!\n"); // debug
+            if (x_start <= x_end) {
+                draw_horizontal_line(p_buffer, x_start, x_end, y, color);
             }
-            draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
             x_left = x1 + (slope_flat_bottom_left * count);
             x_right = x1 + (slope_flat_bottom_right * count);
             count++;
@@ -495,7 +501,12 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
             //     printf("TOP    %f %f %i\n", x_left, x_right, y);
             //     printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // }
-            draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
+            x_start = (int) ceilf(x_left);
+            x_end = (int) x_right;
+            // if (x_start > x_end) printf("SWAPPED!\n"); // debug
+            if (x_start <= x_end) {
+                draw_horizontal_line(p_buffer, x_start, x_end, y, color);
+            }
             x_left = flat_top_left + (slope_flat_top_left * count);
             x_right = flat_top_right + (slope_flat_top_right * count);
             count++;
