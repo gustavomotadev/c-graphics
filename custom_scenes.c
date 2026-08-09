@@ -1459,6 +1459,8 @@ void simplified_perspective_teapot(pixel_buffer* p_buffer, double delta_time, do
 
 void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, double total_time) {
 
+    srand(time(NULL));
+
     model teapot;
     double pi = 3.14159265358979323846f;
     // float deg90 = 3.14159265358979323846f/2.0f;
@@ -1487,5 +1489,5 @@ void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, d
     translate_model(&teapot, 0.0f, 0.0f, 1.0f);
 
     draw_model_scanlines(p_buffer, &teapot, simplified_perspective_projection, 0x0000FFFF);
-    draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
+    // draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
 }

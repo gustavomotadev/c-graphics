@@ -2,6 +2,7 @@
 #define SCENES_MODULE_H
 
 #include <stdlib.h>
+#include <time.h>
 
 #include "graphics_module.h"
 

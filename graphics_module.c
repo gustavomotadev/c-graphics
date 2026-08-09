@@ -249,6 +249,10 @@ void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, 
         float x3 = md->vertexes_2d[c].x;
         float y3 = md->vertexes_2d[c].y;
         
+        // debug
+        // uint32_t rand_color =  ((uint32_t)(rand() & 0xFFFF) << 16) | ((uint32_t)(rand() & 0xFFFF)) | 0xFF;
+        // printf("0x%X, ", rand_color);
+
         draw(p_buffer, x1, y1, x2, y2, x3, y3, color);
     }
     
@@ -348,16 +352,16 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
     // printf("BEFORE %.1f %.1f / %.1f %.1f / %.1f %.1f\n", x1, y1, x2, y2, x3, y3);
 
     // DEBUG HORIZONTAL BOUNDING BOX
-    float x_min = 0.0f, x_max = 0.0f;
-    if (x1 > x2) {
-        x_max = (x1 > x3) ? x1 : x3;
-        x_min = (x2 < x3) ? x2 : x3;
-    } else {
-        x_max = (x2 > x3) ? x2 : x3;
-        x_min = (x1 < x3) ? x1 : x3;
-    }
-    int x_min_i = (int) x_min;
-    int x_max_i = (int) ceilf(x_max);
+    // float x_min = 0.0f, x_max = 0.0f;
+    // if (x1 > x2) {
+    //     x_max = (x1 > x3) ? x1 : x3;
+    //     x_min = (x2 < x3) ? x2 : x3;
+    // } else {
+    //     x_max = (x2 > x3) ? x2 : x3;
+    //     x_min = (x1 < x3) ? x1 : x3;
+    // }
+    // int x_min_i = (int) x_min;
+    // int x_max_i = (int) ceilf(x_max);
     // printf("X_MIN_I %i, X_MAX_I %i\n", x_min_i, x_max_i);
 
     // order vertexes 1 <= 2 <= 3 by coordinate y
@@ -480,31 +484,31 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
             //     printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // }
             x_start = (int) ceilf(x_left);
-            x_end = (int) x_right;
+            x_end = (int) ceilf(x_right);
             // if (x_start > x_end) printf("SWAPPED!\n"); // debug
-            if (x_start <= x_end) { //DEBUG
-                if (x_start < x_min_i || x_end > x_max_i) {
-                    printf("WEIRD LINE\n");
-                    if (x_start < x_min_i) {
-                        printf("LEFT BOUNDARY BROKEN\n");
-                    }
-                    if (x_end > x_max_i) {
-                        printf("RIGHT BOUNDARY BROKEN\n");
-                    }
-                    if (x_start < x_min_i && x_end > x_max_i) {
-                        printf("BOTH BOUNDARIES BROKEN\n");
-                    }
-                    printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
-                    printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
-                    printf("BOUNDING_X_LEFT %i, BOUNDING_X_RIGHT %i\n", x_min_i, x_max_i);
-                    printf("FLAT BOTTOM\n");
-                    if (natural_flat_bottom) {
-                        printf("NATURAL FLAT BOTTOM\n");
-                    }
-                    printf("X_DRAW_LEFT %f, X_DRAW_RIGHT %f, Y_DRAW %i\n", x_left, x_right, y);
-                    printf("SLOPE_LEFT %f, SLOPE_RIGHT %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
-                    color = 0xFF0000FF;
-                }
+            if (x_start <= x_end) {
+                // if (x_start < x_min_i || x_end > x_max_i) { //debug
+                //     printf("WEIRD LINE\n");
+                //     if (x_start < x_min_i) {
+                //         printf("LEFT BOUNDARY BROKEN\n");
+                //     }
+                //     if (x_end > x_max_i) {
+                //         printf("RIGHT BOUNDARY BROKEN\n");
+                //     }
+                //     if (x_start < x_min_i && x_end > x_max_i) {
+                //         printf("BOTH BOUNDARIES BROKEN\n");
+                //     }
+                //     printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
+                //     printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
+                //     printf("BOUNDING_X_LEFT %i, BOUNDING_X_RIGHT %i\n", x_min_i, x_max_i);
+                //     printf("FLAT BOTTOM\n");
+                //     if (natural_flat_bottom) {
+                //         printf("NATURAL FLAT BOTTOM\n");
+                //     }
+                //     printf("X_DRAW_LEFT %f, X_DRAW_RIGHT %f, Y_DRAW %i\n", x_left, x_right, y);
+                //     printf("SLOPE_LEFT %f, SLOPE_RIGHT %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
+                //     color = 0xFF0000FF;
+                // }
 
                 draw_horizontal_line(p_buffer, x_start, x_end, y, color);
             }
@@ -538,31 +542,31 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
             //     printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // }
             x_start = (int) ceilf(x_left);
-            x_end = (int) x_right;
+            x_end = (int) ceilf(x_right);
             // if (x_start > x_end) printf("SWAPPED!\n"); // debug
-            if (x_start <= x_end) { //DEBUG
-                if (x_start < x_min_i || x_end > x_max_i) {
-                    printf("WEIRD LINE\n");
-                    if (x_start < x_min_i) {
-                        printf("LEFT BOUNDARY BROKEN\n");
-                    }
-                    if (x_end > x_max_i) {
-                        printf("RIGHT BOUNDARY BROKEN\n");
-                    }
-                    if (x_start < x_min_i && x_end > x_max_i) {
-                        printf("BOTH BOUNDARIES BROKEN\n");
-                    }
-                    printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
-                    printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
-                    printf("BOUNDING_X_LEFT %i, BOUNDING_X_RIGHT %i\n", x_min_i, x_max_i);
-                    printf("FLAT TOP\n");
-                    if (natural_flat_top) {
-                        printf("NATURAL FLAT TOP\n");
-                    }
-                    printf("X_DRAW_LEFT %f, X_DRAW_RIGHT %f, Y_DRAW %i\n", x_left, x_right, y);
-                    printf("SLOPE_LEFT %f, SLOPE_RIGHT %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
-                    color = 0xFF0000FF;
-                }
+            if (x_start <= x_end) {
+                // if (x_start < x_min_i || x_end > x_max_i) { //debug
+                //     printf("WEIRD LINE\n");
+                //     if (x_start < x_min_i) {
+                //         printf("LEFT BOUNDARY BROKEN\n");
+                //     }
+                //     if (x_end > x_max_i) {
+                //         printf("RIGHT BOUNDARY BROKEN\n");
+                //     }
+                //     if (x_start < x_min_i && x_end > x_max_i) {
+                //         printf("BOTH BOUNDARIES BROKEN\n");
+                //     }
+                //     printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
+                //     printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
+                //     printf("BOUNDING_X_LEFT %i, BOUNDING_X_RIGHT %i\n", x_min_i, x_max_i);
+                //     printf("FLAT TOP\n");
+                //     if (natural_flat_top) {
+                //         printf("NATURAL FLAT TOP\n");
+                //     }
+                //     printf("X_DRAW_LEFT %f, X_DRAW_RIGHT %f, Y_DRAW %i\n", x_left, x_right, y);
+                //     printf("SLOPE_LEFT %f, SLOPE_RIGHT %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
+                //     color = 0xFF0000FF;
+                // }
 
                 draw_horizontal_line(p_buffer, x_start, x_end, y, color);
             }
