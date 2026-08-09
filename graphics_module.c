@@ -206,7 +206,14 @@ vertex_2d viewport_transform(vertex_2d projected, float half_width, float half_h
     return transformed;
 }
 
-void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color) {
+void draw_triangle_wireframe(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color) {
+
+    draw_line_bresenham(p_buffer, x1, y1, x2, y2, color);
+    draw_line_bresenham(p_buffer, x2, y2, x3, y3, color);
+    draw_line_bresenham(p_buffer, x3, y3, x1, y1, color);
+}
+
+void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, draw_triangle_function draw, uint32_t color) {
 
     float half_width = (float)p_buffer->width / 2.0f;
     float half_height = (float)p_buffer->height / 2.0f;
@@ -218,8 +225,6 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
         md->pixels[i] = round_vector_2d(md->vertexes_2d[i]);
         // printf("[%i] %i %i\n", i, md->pixels[i].x, md->pixels[i].y);
     }
-
-    // color = 0x000000FF;
 
     for (int i = 0; i < md->num_faces; i++)
     {
@@ -233,14 +238,13 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
         int x3 = md->pixels[c].x;
         int y3 = md->pixels[c].y;
         
-        draw_line_bresenham(p_buffer, x1, y1, x2, y2, color);
-        // color += 0x00000A00;
-        draw_line_bresenham(p_buffer, x2, y2, x3, y3, color);
-        // color += 0x00000A00;
-        draw_line_bresenham(p_buffer, x3, y3, x1, y1, color);
-        // color += 0x14141400;
+        draw(p_buffer, x1, y1, x2, y2, x3, y3, color);
     }
     
+}
+
+void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color) {
+    draw_model(p_buffer, md, project, draw_triangle_wireframe, color);
 }
 
 void scale_model(model* md, float factor_x, float factor_y, float factor_z) {
