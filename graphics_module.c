@@ -345,7 +345,12 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, int x1, int y1, int x2,
     // discard zero height triangles
     if (y1 == y3) return;
 
+    bool natural_flat_bottom = y2 == y3 ? true : false;
+    bool natural_flat_top = y1 == y2 ? true : false;
+
     // find fourth point that lies in the longest edge (between p1 and p3) with the same y coordinate as middle height point p2 
+    // does not need to skip this in case of natural flat top or natural flat bottom, this will never divide by zero because zero height triangles are already discarded
+    // also this is important to find what is left and right
     int y4 = y2;
     float x4 = x1 + ((x3-x1)*(((float) (y2-y1))/(y3-y1)));
 
@@ -362,10 +367,22 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, int x1, int y1, int x2,
 
     // calculate inverse slope (dx/dy) to find how much x changes for unit increments of y
 
-    float slope_flat_bottom_p1_p2 = ((float)(x2-x1))/(y2-y1);
-    float slope_flat_bottom_p1_p4 = ((float)(x4-x1))/(y4-y1);
-    float slope_flat_top_p2_p3 = ((float)(x3-x2))/(y3-y2);
-    float slope_flat_top_p4_p3 = ((float)(x3-x4))/(y3-y4);
+    float slope_flat_bottom_p1_p2 = 0.0f;
+    float slope_flat_bottom_p1_p4 = 0.0f;
+    float slope_flat_top_p2_p3 = 0.0f;
+    float slope_flat_top_p4_p3 = 0.0f;
+    // skip bottom if natural top
+    if (!natural_flat_top) {
+
+        slope_flat_bottom_p1_p2 = ((float)(x2-x1))/(y2-y1);
+        slope_flat_bottom_p1_p4 = ((float)(x4-x1))/(y4-y1);
+    }
+    // skip top if natural bottom
+    if (!natural_flat_bottom) {
+
+        slope_flat_top_p2_p3 = ((float)(x3-x2))/(y3-y2);
+        slope_flat_top_p4_p3 = ((float)(x3-x4))/(y3-y4);
+    }
 
     // check which ones are on the "left" or "right"
 
@@ -403,27 +420,39 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, int x1, int y1, int x2,
         flat_top_right = x2;
     }
 
+    // loop each side
+
+    float x_left = 0.0f, x_right = 0.0f;
+
     // loop flat bottom:
+    if (!natural_flat_top) {
 
-    float x_left = x1, x_right = x1;
-
-    for (int y = y1; y <= y2; y++)
-    {
-        // printf("BOTTOM %.1f %.1f\n", x_left, x_right);
-        draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
-        x_left += slope_flat_bottom_left;
-        x_right += slope_flat_bottom_right;
+        x_left = x1;
+        x_right = x1;
+    
+        for (int y = y1; y <= y2; y++)
+        {
+            // printf("BOTTOM %.1f %.1f\n", x_left, x_right);
+            // if (natural_flat_bottom) printf("BOTTOM %.1f %.1f %i\n", x_left, x_right, y);
+            draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
+            x_left += slope_flat_bottom_left;
+            x_right += slope_flat_bottom_right;
+        }
     }
     
     // loop flat top:
+    if (!natural_flat_bottom) {
 
-    x_left = flat_top_left, x_right = flat_top_right;
-
-    for (int y = y2; y <= y3; y++)
-    {
-        // printf("TOP    %.1f %.1f\n", x_left, x_right);
-        draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
-        x_left += slope_flat_top_left;
-        x_right += slope_flat_top_right;
+        x_left = flat_top_left;
+        x_right = flat_top_right;
+    
+        for (int y = y2; y <= y3; y++)
+        {
+            // printf("TOP    %.1f %.1f\n", x_left, x_right);
+            // if (natural_flat_top) printf("TOP    %.1f %.1f %i\n", x_left, x_right, y);
+            draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
+            x_left += slope_flat_top_left;
+            x_right += slope_flat_top_right;
+        }
     }
 }
