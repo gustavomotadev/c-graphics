@@ -441,6 +441,7 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
     float x_left = 0.0f, x_right = 0.0f;
     int y_start = 0.0f, y_end = 0.0f;
     float pre_step = 0.0f;
+    int count = 0;
 
     // loop flat bottom:
     if (!natural_flat_top) {
@@ -448,11 +449,12 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
         y_start = (int) ceilf(y1);
         y_end = (int) y2;
 
-        // pre_step = (float) y_start - y1;
+        pre_step = (float) y_start - y1;
 
         x_left = x1 + (pre_step * slope_flat_bottom_left);
         x_right = x1 + (pre_step * slope_flat_bottom_right);
-    
+        
+        count = 1;
         for (int y = y_start; y <= y_end; y++)
         {
             // printf("BOTTOM %.1f %.1f %i\n", x_left, x_right, y);
@@ -464,8 +466,9 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
                 printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             }
             draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
-            x_left += slope_flat_bottom_left;
-            x_right += slope_flat_bottom_right;
+            x_left = x1 + (slope_flat_bottom_left * count);
+            x_right = x1 + (slope_flat_bottom_right * count);
+            count++;
         }
     }
     
@@ -475,11 +478,12 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
         y_start = (int) ceilf(y2);
         y_end = (int) y3;
 
-        // pre_step = (float) y_start - y1;
+        pre_step = (float) y_start - y2;
 
         x_left = flat_top_left + (pre_step * slope_flat_top_left);
         x_right = flat_top_right + (pre_step * slope_flat_top_right);
-    
+        
+        count = 1;
         for (int y = y_start; y <= y_end; y++)
         {
             // printf("TOP    %.1f %.1f %i\n", x_left, x_right, y);
@@ -492,8 +496,9 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
             //     printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // }
             draw_horizontal_line(p_buffer, ceilf(x_left), (int) x_right, y, color);
-            x_left += slope_flat_top_left;
-            x_right += slope_flat_top_right;
+            x_left = flat_top_left + (slope_flat_top_left * count);
+            x_right = flat_top_right + (slope_flat_top_right * count);
+            count++;
         }
     }
 }
