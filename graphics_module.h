@@ -41,7 +41,7 @@ typedef struct model {
 typedef vector_2d (*projection_function)(vector_3d);
 
 //function pointer that ...
-typedef void (*draw_triangle_function)(pixel_buffer*, int, int, int, int, int, int, uint32_t);
+typedef void (*draw_triangle_function)(pixel_buffer*, float, float, float, float, float, float, uint32_t);
 
 bool setup_pixel_buffer(pixel_buffer* p_buffer, int width, int height);
 
@@ -59,11 +59,11 @@ void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2,
 
 vertex_2d viewport_transform(vertex_2d projected, float half_width, float half_height);
 
-void draw_triangle_wireframe(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+void draw_triangle_wireframe(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color);
 
 void draw_horizontal_line(pixel_buffer* p_buffer, int x1, int x2, int y, uint32_t color);
 
-void rasterize_triangle_scanline(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color);
 
 void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, draw_triangle_function draw, uint32_t color);
 

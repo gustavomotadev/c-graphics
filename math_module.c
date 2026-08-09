@@ -93,3 +93,8 @@ vector_2d simplified_perspective_projection(vector_3d v3d) {
 
     return v2d;
 }
+
+bool compare_floats(float a, float b, float epsilon) {
+
+    return fabsf(a - b) < epsilon ? true : false;
+}

@@ -2,6 +2,7 @@
 #define MATH_MODULE_H
 
 #include <math.h>
+#include <stdbool.h>
 
 typedef struct vector_2d {
     float x;
@@ -32,5 +33,7 @@ void translate_vector_3d(vector_3d* v3d, float dx, float dy, float dz);
 vector_2d isometric_projection(vector_3d v3d);
 
 vector_2d simplified_perspective_projection(vector_3d v3d);
+
+bool compare_floats(float a, float b, float epsilon);
 
 #endif // MATH_MODULE_H
