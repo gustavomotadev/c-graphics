@@ -50,4 +50,8 @@ vector_3d normalize_vector_3d(vector_3d v3d);
 
 vector_3d compute_triangle_normal(vector_3d p1, vector_3d p2, vector_3d p3);
 
+float dot_product_vector_3d(vector_3d first, vector_3d second);
+
+vector_3d compute_triangle_centroid(vector_3d p1, vector_3d p2, vector_3d p3);
+
 #endif // MATH_MODULE_H

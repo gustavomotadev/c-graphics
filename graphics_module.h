@@ -86,4 +86,6 @@ void compute_face_normals(model* md);
 
 uint32_t map_normal_to_color(vector_3d v3d);
 
+bool back_face_culling(vertex_3d p1, vertex_3d p2, vertex_3d p3, vector_3d normal);
+
 #endif // GRAPHICS_MODULE_H

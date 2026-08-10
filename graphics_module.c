@@ -242,11 +242,17 @@ void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, 
 
     vertexes_3d_to_2d(p_buffer, md, project);
 
-    // debug
     compute_face_normals(md);
 
     for (int i = 0; i < md->num_faces; i++)
     {
+        if (!back_face_culling(
+                md->vertexes_3d_transformed[md->tri_faces[i].a], 
+                md->vertexes_3d_transformed[md->tri_faces[i].b], 
+                md->vertexes_3d_transformed[md->tri_faces[i].c], 
+                md->face_normals[i])) {
+            continue;
+        }
         
         // debug
         // uint32_t rand_color =  ((uint32_t)(rand() & 0xFFFF) << 16) | ((uint32_t)(rand() & 0xFFFF)) | 0xFF;
@@ -254,6 +260,8 @@ void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, 
 
         //debug
         uint32_t normal_color = map_normal_to_color(md->face_normals[i]);
+        // normal_color &= 0x0000FFFF;
+        // printf("%X, ", normal_color);
 
         draw(p_buffer, 
             md->vertexes_2d[md->tri_faces[i].a].x, 
@@ -614,4 +622,20 @@ uint32_t map_normal_to_color(vector_3d v3d) {
     int b = (int) roundf(((v3d.z*0.5) + 0.5) * 255);
 
     return (uint32_t) ((r << 24) | (g << 16) | (b << 8) | 0xFF);
+}
+
+// assumes the simple perspective projection with camera at (0, 0, 0)
+// returns true if face should be drawn, false if culled
+bool back_face_culling(vertex_3d p1, vertex_3d p2, vertex_3d p3, vector_3d normal) {
+
+    // center of the face
+    vector_3d centroid = compute_triangle_centroid(p1, p2, p3);
+
+    // with the camera assumption, view vector is -Vcentroid [(0,0,0) - Vcentroid]
+    vector_3d view_vector = centroid;
+    scale_vector_3d(&view_vector, -1.0f, -1.0f, -1.0f);
+
+    // normalizing the view vector is not necessary for culling
+
+    return dot_product_vector_3d(normal, view_vector) > 0 ? true : false;
 }

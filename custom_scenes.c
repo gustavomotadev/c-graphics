@@ -1487,7 +1487,7 @@ void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, d
     // rotate_model(&cube, 0.0f, 0.0f, -z_value);
     
     scale_model(&teapot, 0.75f, 0.75f, 0.75f);
-    translate_model(&teapot, 0.0f, 0.0f, 1.0f);
+    translate_model(&teapot, 0.0f, 0.0f, -1.0f);
 
     draw_model_scanlines(p_buffer, &teapot, simplified_perspective_projection, 0x0000FFFF);
     // draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);

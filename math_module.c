@@ -88,8 +88,8 @@ vector_2d simplified_perspective_projection(vector_3d v3d) {
 
     vector_2d v2d;
 
-    v2d.x = v3d.x / v3d.z;
-    v2d.y = v3d.y / v3d.z;
+    v2d.x = v3d.x / ((-1)*v3d.z);
+    v2d.y = v3d.y / ((-1)*v3d.z);
 
     return v2d;
 }
@@ -158,4 +158,20 @@ vector_3d compute_triangle_normal(vector_3d p1, vector_3d p2, vector_3d p3) {
     vector_3d normal = cross_product_vector_3d(edge_a, edge_b);
 
     return normalize_vector_3d(normal);
+}
+
+float dot_product_vector_3d(vector_3d first, vector_3d second) {
+
+    return (first.x*second.x) + (first.y*second.y) + (first.z*second.z);
+}
+
+vector_3d compute_triangle_centroid(vector_3d p1, vector_3d p2, vector_3d p3) {
+    
+    vector_3d centroid;
+
+    centroid.x = (p1.x + p2.x + p3.x)/3;
+    centroid.y = (p1.y + p2.y + p3.y)/3;
+    centroid.z = (p1.z + p2.z + p3.z)/3;
+
+    return centroid;
 }
