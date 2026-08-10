@@ -287,6 +287,7 @@ void create_teapot(model* teapot) {
     teapot->vertexes_2d = (vertex_2d *) malloc(teapot->num_vertexes*sizeof(vertex_2d));
     teapot->pixels = (pixel *) malloc(teapot->num_vertexes*sizeof(pixel));
     teapot->tri_faces = (triangle_face *) malloc(teapot->num_faces*sizeof(triangle_face));
+    teapot->face_normals = (vector_3d *) malloc(teapot->num_faces*sizeof(vector_3d));
 
     teapot->vertexes_3d[0].x = 0.35f;
     teapot->vertexes_3d[0].y = -0.0f;
@@ -1490,4 +1491,6 @@ void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, d
 
     draw_model_scanlines(p_buffer, &teapot, simplified_perspective_projection, 0x0000FFFF);
     // draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
+
+    free_model_data(&teapot);
 }

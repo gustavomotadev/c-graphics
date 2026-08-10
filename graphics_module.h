@@ -35,6 +35,7 @@ typedef struct model {
     pixel* pixels;
     triangle_face* tri_faces;
     int num_faces;
+    vector_3d* face_normals;
 } model;
 
 //function pointer that accepts functions with a signature of receiving vector_3d and returning vector_2d
@@ -78,5 +79,7 @@ void rotate_model(model* md, float angle_x, float angle_y, float angle_z);
 void translate_model(model* md, float dx, float dy, float dz);
 
 void reset_model_transform(model* md);
+
+void free_model_data(model* md);
 
 #endif // GRAPHICS_MODULE_H

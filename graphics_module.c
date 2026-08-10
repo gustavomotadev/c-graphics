@@ -576,3 +576,25 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
         }
     }
 }
+
+void free_model_data(model* md) {
+    /*
+    typedef struct model {
+        vertex_3d* vertexes_3d;
+        int num_vertexes;
+        vertex_3d* vertexes_3d_transformed;
+        vertex_2d* vertexes_2d;
+        pixel* pixels;
+        triangle_face* tri_faces;
+        int num_faces;
+        vector_3d* face_normals;
+    } model;
+    */
+
+    free(md->vertexes_3d);
+    free(md->vertexes_3d_transformed);
+    free(md->vertexes_2d);
+    free(md->pixels);
+    free(md->tri_faces);
+    free(md->face_normals);
+}
