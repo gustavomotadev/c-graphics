@@ -98,3 +98,64 @@ bool compare_floats(float a, float b, float epsilon) {
 
     return fabsf(a - b) < epsilon ? true : false;
 }
+
+vector_3d subtract_vector_3d(vector_3d first, vector_3d second) {
+    vector_3d result;
+
+    result.x = first.x - second.x;
+    result.y = first.y - second.y;
+    result.z = first.z - second.z;
+
+    return result;
+}
+
+vector_3d cross_product_vector_3d(vector_3d first, vector_3d second) {
+    vector_3d result;
+
+    result.x = (first.y * second.z) - (first.z * second.y);
+    result.y = (first.z * second.x) - (first.x * second.z);
+    result.z = (first.x * second.y) - (first.y * second.x);
+
+    return result;
+}
+
+float euclidean_norm_vector_3d(vector_3d v3d) {
+    
+    return sqrtf((v3d.x*v3d.x) + (v3d.y*v3d.y) + (v3d.z*v3d.z));
+}
+
+vector_3d zero_vector_3d() {
+
+    vector_3d zero;
+    zero.x = 0.0f;
+    zero.y = 0.0f;
+    zero.z = 0.0f;
+
+    return zero;
+}
+
+vector_3d normalize_vector_3d(vector_3d v3d) {
+
+    float euclidean_norm = euclidean_norm_vector_3d(v3d);
+
+    if (compare_floats(euclidean_norm, 0.0f, DEFAULT_EPSILON)) {
+
+        return zero_vector_3d();
+    }
+
+    v3d.x /= euclidean_norm;
+    v3d.y /= euclidean_norm;
+    v3d.z /= euclidean_norm;
+
+    return v3d;
+}
+
+vector_3d compute_triangle_normal(vector_3d p1, vector_3d p2, vector_3d p3) {
+
+    vector_3d edge_a = subtract_vector_3d(p2, p1);
+    vector_3d edge_b = subtract_vector_3d(p3, p1);
+
+    vector_3d normal = cross_product_vector_3d(edge_a, edge_b);
+
+    return normalize_vector_3d(normal);
+}

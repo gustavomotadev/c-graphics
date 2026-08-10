@@ -223,7 +223,7 @@ void draw_triangle_wireframe(pixel_buffer* p_buffer, float x1, float y1, float x
     draw_line_bresenham(p_buffer, x3i, y3i, x1i, y1i, color);
 }
 
-void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, draw_triangle_function draw, uint32_t color) {
+void vertexes_3d_to_2d(pixel_buffer* p_buffer, model* md, projection_function project) {
 
     float half_width = (float)p_buffer->width / 2.0f;
     float half_height = (float)p_buffer->height / 2.0f;
@@ -236,24 +236,32 @@ void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, 
         // md->pixels[i] = round_vector_2d(md->vertexes_2d[i]);
         // printf("[%i] %i %i\n", i, md->pixels[i].x, md->pixels[i].y);
     }
+}
+
+void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, draw_triangle_function draw, uint32_t color) {
+
+    vertexes_3d_to_2d(p_buffer, md, project);
+
+    // debug
+    compute_face_normals(md);
 
     for (int i = 0; i < md->num_faces; i++)
     {
-        int a = md->tri_faces[i].a;
-        int b = md->tri_faces[i].b;
-        int c = md->tri_faces[i].c;
-        float x1 = md->vertexes_2d[a].x;
-        float y1 = md->vertexes_2d[a].y;
-        float x2 = md->vertexes_2d[b].x;
-        float y2 = md->vertexes_2d[b].y;
-        float x3 = md->vertexes_2d[c].x;
-        float y3 = md->vertexes_2d[c].y;
         
         // debug
         // uint32_t rand_color =  ((uint32_t)(rand() & 0xFFFF) << 16) | ((uint32_t)(rand() & 0xFFFF)) | 0xFF;
         // printf("0x%X, ", rand_color);
 
-        draw(p_buffer, x1, y1, x2, y2, x3, y3, color);
+        //debug
+        uint32_t normal_color = map_normal_to_color(md->face_normals[i]);
+
+        draw(p_buffer, 
+            md->vertexes_2d[md->tri_faces[i].a].x, 
+            md->vertexes_2d[md->tri_faces[i].a].y, 
+            md->vertexes_2d[md->tri_faces[i].b].x, 
+            md->vertexes_2d[md->tri_faces[i].b].y, 
+            md->vertexes_2d[md->tri_faces[i].c].x, 
+            md->vertexes_2d[md->tri_faces[i].c].y, normal_color);
     }
     
 }
@@ -578,18 +586,6 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
 }
 
 void free_model_data(model* md) {
-    /*
-    typedef struct model {
-        vertex_3d* vertexes_3d;
-        int num_vertexes;
-        vertex_3d* vertexes_3d_transformed;
-        vertex_2d* vertexes_2d;
-        pixel* pixels;
-        triangle_face* tri_faces;
-        int num_faces;
-        vector_3d* face_normals;
-    } model;
-    */
 
     free(md->vertexes_3d);
     free(md->vertexes_3d_transformed);
@@ -597,4 +593,25 @@ void free_model_data(model* md) {
     free(md->pixels);
     free(md->tri_faces);
     free(md->face_normals);
+}
+
+void compute_face_normals(model* md) {
+
+    for (int i = 0; i < md->num_faces; i++)
+    {
+        md->face_normals[i] = compute_triangle_normal(
+            md->vertexes_3d_transformed[md->tri_faces[i].a],
+            md->vertexes_3d_transformed[md->tri_faces[i].b],
+            md->vertexes_3d_transformed[md->tri_faces[i].c]);
+    }
+    
+}
+
+uint32_t map_normal_to_color(vector_3d v3d) {
+
+    int r = (int) roundf(((v3d.x*0.5) + 0.5) * 255);
+    int g = (int) roundf(((v3d.y*0.5) + 0.5) * 255);
+    int b = (int) roundf(((v3d.z*0.5) + 0.5) * 255);
+
+    return (uint32_t) ((r << 24) | (g << 16) | (b << 8) | 0xFF);
 }

@@ -82,4 +82,8 @@ void reset_model_transform(model* md);
 
 void free_model_data(model* md);
 
+void compute_face_normals(model* md);
+
+uint32_t map_normal_to_color(vector_3d v3d);
+
 #endif // GRAPHICS_MODULE_H
