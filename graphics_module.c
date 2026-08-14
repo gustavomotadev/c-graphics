@@ -721,6 +721,12 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
     // bool drew_at_least_once = false;
     // printf("PRE-LOOP ");
 
+    // top left rule:
+
+    bool is_top_left_23 = ((y3 < y2) || (y3 == y2 && x3 < x2)) ? true : false; 
+    bool is_top_left_31 = ((y1 < y3) || (y1 == y3 && x1 < x3)) ? true : false; 
+    bool is_top_left_12 = ((y2 < y1) || (y2 == y1 && x2 < x1)) ? true : false; 
+
     for (int x = min_x; x <= max_x; x++)
     {
         for (int y = min_y; y <= max_y; y++)
@@ -733,19 +739,22 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
             float edge23 = EDGE23(x_center, y_center);
             //debug
             // printf("[1] E23: %.1f\n", edge23);
-            // if (edge23 < 0) {
-            //     continue;
-            // }
+            if (edge23 > 0 ||
+                (compare_floats(edge23, 0.0f, DEFAULT_EPSILON) && (!is_top_left_23))) {
+                continue;
+            }
             float edge31 = EDGE31(x_center, y_center);
             // printf("[2] E31: %.1f\n", edge31);
-            // if (edge31 < 0) {
-            //     continue;
-            // }
+            if (edge31 > 0 ||
+                (compare_floats(edge31, 0.0f, DEFAULT_EPSILON) && (!is_top_left_31))) {
+                continue;
+            }
             float edge12 = EDGE12(x_center, y_center);
             // printf("[3] E12: %.1f\n", edge12);
-            // if (edge12 < 0) {
-            //     continue;
-            // }
+            if (edge12 > 0 ||
+                (compare_floats(edge12, 0.0f, DEFAULT_EPSILON) && (!is_top_left_12))) {
+                continue;
+            }
 
             // if (((edge23 >= 0) && (edge31 >= 0) && (edge12 >= 0))) {
             //     //debug
@@ -753,16 +762,16 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
             //     draw_pixel(p_buffer, x, y, 0xFF0000FF);
             //     // drew_at_least_once = true;
             // }
-            if (((edge23 <= 0) && (edge31 <= 0) && (edge12 <= 0))) {
-                //debug
-                // printf("<= %i %i\n", x, y);
-                draw_pixel(p_buffer, x, y, color);
-                // drew_at_least_once = true;
-            }
+            // if (((edge23 <= 0) && (edge31 <= 0) && (edge12 <= 0))) {
+            //     //debug
+            //     // printf("<= %i %i\n", x, y);
+            //     draw_pixel(p_buffer, x, y, color);
+            //     // drew_at_least_once = true;
+            // }
 
             // printf("PIXEL DRAW!\n");
 
-            // draw_pixel(p_buffer, x, y, color);
+            draw_pixel(p_buffer, x, y, color);
         }
         
     }
