@@ -213,9 +213,9 @@ void draw_line_bresenham(pixel_buffer* p_buffer, int x1, int y1, int x2, int y2,
     }
 }
 
-vertex_2d viewport_transform(vertex_2d projected, float half_width, float half_height) {
+screen_vertex viewport_transform(screen_vertex projected, float half_width, float half_height) {
 
-    vertex_2d transformed;
+    screen_vertex transformed;
     
     transformed.x = (projected.x * half_width) + half_width;
     transformed.y = (projected.y * half_height) + half_height;
@@ -223,14 +223,14 @@ vertex_2d viewport_transform(vertex_2d projected, float half_width, float half_h
     return transformed;
 }
 
-void draw_triangle_wireframe(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color) {
+void draw_triangle_wireframe(pixel_buffer* p_buffer, screen_vertex v1, screen_vertex v2, screen_vertex v3, uint32_t color) {
 
-    int x1i = roundf(x1);
-    int x2i = roundf(x2);
-    int x3i = roundf(x3);
-    int y1i = roundf(y1);
-    int y2i = roundf(y2);
-    int y3i = roundf(y3);
+    int x1i = roundf(v1.x);
+    int x2i = roundf(v2.x);
+    int x3i = roundf(v3.x);
+    int y1i = roundf(v1.y);
+    int y2i = roundf(v2.y);
+    int y3i = roundf(v3.y);
 
     draw_line_bresenham(p_buffer, x1i, y1i, x2i, y2i, color);
     draw_line_bresenham(p_buffer, x2i, y2i, x3i, y3i, color);
@@ -244,7 +244,7 @@ void vertexes_3d_to_2d(pixel_buffer* p_buffer, model* md, projection_function pr
 
     for (int i = 0; i < md->num_vertexes; i++)
     {
-        md->vertexes_2d[i] = viewport_transform(project(md->vertexes_3d_transformed[i]), half_width, half_height);
+        md->screen_vertexes[i] = viewport_transform(project(md->vertexes_3d_transformed[i]), half_width, half_height);
         // printf("[%i] %.2f %.2f\n", i, md->vertexes_2d[i].x, md->vertexes_2d[i].y);
         // TODO: maybe remove pixels array from model completely
         // md->pixels[i] = round_vector_2d(md->vertexes_2d[i]);
@@ -278,12 +278,10 @@ void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, 
         // printf("%X, ", normal_color);
 
         draw(p_buffer, 
-            md->vertexes_2d[md->tri_faces[i].a].x, 
-            md->vertexes_2d[md->tri_faces[i].a].y, 
-            md->vertexes_2d[md->tri_faces[i].b].x, 
-            md->vertexes_2d[md->tri_faces[i].b].y, 
-            md->vertexes_2d[md->tri_faces[i].c].x, 
-            md->vertexes_2d[md->tri_faces[i].c].y, normal_color);
+            md->screen_vertexes[md->tri_faces[i].a], 
+            md->screen_vertexes[md->tri_faces[i].b], 
+            md->screen_vertexes[md->tri_faces[i].c], 
+            normal_color);
     }
     
 }
@@ -379,43 +377,43 @@ void draw_horizontal_line(pixel_buffer* p_buffer, int x1, int x2, int y, uint32_
 }
 
 // TODO: fix error on negative coordinates or coordinates out of screen
-void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color) {
+void rasterize_triangle_scanline(pixel_buffer* p_buffer, screen_vertex v1, screen_vertex v2, screen_vertex v3, uint32_t color) {
 
     float EPSILON = 0.0001;
     
-    // printf("BEFORE %.1f %.1f / %.1f %.1f / %.1f %.1f\n", x1, y1, x2, y2, x3, y3);
+    // printf("BEFORE %.1f %.1f / %.1f %.1f / %.1f %.1f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
 
     // DEBUG HORIZONTAL BOUNDING BOX
     // float x_min = 0.0f, x_max = 0.0f;
-    // if (x1 > x2) {
-    //     x_max = (x1 > x3) ? x1 : x3;
-    //     x_min = (x2 < x3) ? x2 : x3;
+    // if (v1.x > v2.x) {
+    //     x_max = (v1.x > v3.x) ? v1.x : v3.x;
+    //     x_min = (v2.x < v3.x) ? v2.x : v3.x;
     // } else {
-    //     x_max = (x2 > x3) ? x2 : x3;
-    //     x_min = (x1 < x3) ? x1 : x3;
+    //     x_max = (v2.x > v3.x) ? v2.x : v3.x;
+    //     x_min = (v1.x < v3.x) ? v1.x : v3.x;
     // }
     // int x_min_i = (int) x_min;
     // int x_max_i = (int) ceilf(x_max);
     // printf("X_MIN_I %i, X_MAX_I %i\n", x_min_i, x_max_i);
 
     // order vertexes 1 <= 2 <= 3 by coordinate y
-    if (y1 > y2) swap_vertexes_2d(&x1, &y1, &x2, &y2);
-    if (y2 > y3) swap_vertexes_2d(&x2, &y2, &x3, &y3);
-    if (y1 > y2) swap_vertexes_2d(&x1, &y1, &x2, &y2);
+    if (v1.y > v2.y) swap_vertexes_2d(&v1.x, &v1.y, &v2.x, &v2.y);
+    if (v2.y > v3.y) swap_vertexes_2d(&v2.x, &v2.y, &v3.x, &v3.y);
+    if (v1.y > v2.y) swap_vertexes_2d(&v1.x, &v1.y, &v2.x, &v2.y);
 
-    // printf("AFTER  %.1f %.1f / %.1f %.1f / %.1f %.1f\n", x1, y1, x2, y2, x3, y3);
+    // printf("AFTER  %.1f %.1f / %.1f %.1f / %.1f %.1f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
 
     // discard zero height triangles
-    if (compare_floats(y1, y3, EPSILON)) return;
+    if (compare_floats(v1.y, v3.y, EPSILON)) return;
 
-    bool natural_flat_bottom = compare_floats(y2, y3, EPSILON);
-    bool natural_flat_top = compare_floats(y1, y2, EPSILON);
+    bool natural_flat_bottom = compare_floats(v2.y, v3.y, EPSILON);
+    bool natural_flat_top = compare_floats(v1.y, v2.y, EPSILON);
 
     // find fourth point that lies in the longest edge (between p1 and p3) with the same y coordinate as middle height point p2 
     // does not need to skip this in case of natural flat top or natural flat bottom, this will never divide by zero because zero height triangles are already discarded
     // also this is important to find what is left and right
-    float y4 = y2;
-    float x4 = x1 + ((x3-x1)*((y2-y1)/(y3-y1)));
+    float y4 = v2.y;
+    float x4 = v1.x + ((v3.x-v1.x)*((v2.y-v1.y)/(v3.y-v1.y)));
 
     // // debug
     // draw_pixel(p_buffer, roundf(x4), y4, 0xFFFF00FF);
@@ -441,14 +439,14 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
     // skip bottom if natural top
     if (!natural_flat_top) {
 
-        slope_flat_bottom_p1_p2 = (x2-x1)/(y2-y1);
-        slope_flat_bottom_p1_p4 = (x4-x1)/(y4-y1);
+        slope_flat_bottom_p1_p2 = (v2.x-v1.x)/(v2.y-v1.y);
+        slope_flat_bottom_p1_p4 = (x4-v1.x)/(y4-v1.y);
     }
     // skip top if natural bottom
     if (!natural_flat_bottom) {
 
-        slope_flat_top_p2_p3 = (x3-x2)/(y3-y2);
-        slope_flat_top_p4_p3 = (x3-x4)/(y3-y4);
+        slope_flat_top_p2_p3 = (v3.x-v2.x)/(v3.y-v2.y);
+        slope_flat_top_p4_p3 = (v3.x-x4)/(v3.y-y4);
     }
 
     // check which ones are on the "left" or "right"
@@ -461,7 +459,7 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
     float flat_top_left = 0;
     float flat_top_right = 0;
 
-    if (x2 < x4) {
+    if (v2.x < x4) {
 
         // p2 on the "left"
         slope_flat_bottom_left = slope_flat_bottom_p1_p2;
@@ -470,7 +468,7 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
         slope_flat_top_left = slope_flat_top_p2_p3;
         slope_flat_top_right = slope_flat_top_p4_p3;
 
-        flat_top_left = x2;
+        flat_top_left = v2.x;
         flat_top_right = x4;
 
 
@@ -484,7 +482,7 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
         slope_flat_top_right = slope_flat_top_p2_p3;
 
         flat_top_left = x4;
-        flat_top_right = x2;
+        flat_top_right = v2.x;
     }
 
     // loop each side
@@ -498,13 +496,13 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
     // loop flat bottom:
     if (!natural_flat_top) {
 
-        y_start = (int) ceilf(y1);
-        y_end = (int) y2;
+        y_start = (int) ceilf(v1.y);
+        y_end = (int) v2.y;
 
-        pre_step = (float) y_start - y1;
+        pre_step = (float) y_start - v1.y;
 
-        x_left = x1 + (pre_step * slope_flat_bottom_left);
-        x_right = x1 + (pre_step * slope_flat_bottom_right);
+        x_left = v1.x + (pre_step * slope_flat_bottom_left);
+        x_right = v1.x + (pre_step * slope_flat_bottom_right);
         
         count = 1;
         for (int y = y_start; y <= y_end; y++)
@@ -513,7 +511,7 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
             // printf("SLOPE  %.1f %.1f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // if (natural_flat_bottom) printf("BOTTOM %.1f %.1f %i\n", x_left, x_right, y);
             // if (ceilf(x_left) < 0 || (int) x_right >= p_buffer->width) {
-            //     printf("AFTER  %f %f / %f %f / %f %f\n", x1, y1, x2, y2, x3, y3);
+            //     printf("AFTER  %f %f / %f %f / %f %f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
             //     printf("BOTTOM %f %f %i\n", x_left, x_right, y);
             //     printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // }
@@ -532,8 +530,8 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
                 //     if (x_start < x_min_i && x_end > x_max_i) {
                 //         printf("BOTH BOUNDARIES BROKEN\n");
                 //     }
-                //     printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
-                //     printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
+                //     printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
+                //     printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
                 //     printf("BOUNDING_X_LEFT %i, BOUNDING_X_RIGHT %i\n", x_min_i, x_max_i);
                 //     printf("FLAT BOTTOM\n");
                 //     if (natural_flat_bottom) {
@@ -546,8 +544,8 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
 
                 draw_horizontal_line(p_buffer, x_start, x_end, y, color);
             }
-            x_left = x1 + (slope_flat_bottom_left * count);
-            x_right = x1 + (slope_flat_bottom_right * count);
+            x_left = v1.x + (slope_flat_bottom_left * count);
+            x_right = v1.x + (slope_flat_bottom_right * count);
             count++;
         }
     }
@@ -555,10 +553,10 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
     // loop flat top:
     if (!natural_flat_bottom) {
 
-        y_start = (int) ceilf(y2);
-        y_end = (int) y3;
+        y_start = (int) ceilf(v2.y);
+        y_end = (int) v3.y;
 
-        pre_step = (float) y_start - y2;
+        pre_step = (float) y_start - v2.y;
 
         x_left = flat_top_left + (pre_step * slope_flat_top_left);
         x_right = flat_top_right + (pre_step * slope_flat_top_right);
@@ -571,7 +569,7 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
             // if (natural_flat_top) printf("TOP    %.1f %.1f %i\n", x_left, x_right, y);
             // printf("INTS %i %i\n", (int) ceilf(x_left), (int) x_right);
             // if ((int) ceilf(x_left) < 0 || (int) x_right >= p_buffer->width) {
-            //     printf("AFTER  %f %f / %f %f / %f %f\n", x1, y1, x2, y2, x3, y3);
+            //     printf("AFTER  %f %f / %f %f / %f %f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
             //     printf("TOP    %f %f %i\n", x_left, x_right, y);
             //     printf("SLOPE  %f %f\n", slope_flat_bottom_left, slope_flat_bottom_right);
             // }
@@ -590,8 +588,8 @@ void rasterize_triangle_scanline(pixel_buffer* p_buffer, float x1, float y1, flo
                 //     if (x_start < x_min_i && x_end > x_max_i) {
                 //         printf("BOTH BOUNDARIES BROKEN\n");
                 //     }
-                //     printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
-                //     printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", x1, y1, x2, y2, x3, y3);
+                //     printf("BEFORE SORT %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
+                //     printf("AFTER SORT  %.1f, %.1f ; %.1f, %.1f ; %.1f, %.1f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
                 //     printf("BOUNDING_X_LEFT %i, BOUNDING_X_RIGHT %i\n", x_min_i, x_max_i);
                 //     printf("FLAT TOP\n");
                 //     if (natural_flat_top) {
@@ -615,8 +613,9 @@ void free_model_data(model* md) {
 
     free(md->vertexes_3d);
     free(md->vertexes_3d_transformed);
-    free(md->vertexes_2d);
-    free(md->pixels);
+    free(md->screen_vertexes);
+    // free(md->vertexes_2d);
+    // free(md->pixels);
     free(md->tri_faces);
     free(md->face_normals);
 }
@@ -658,7 +657,7 @@ bool back_face_culling(vertex_3d p1, vertex_3d p2, vertex_3d p3, vector_3d norma
     return dot_product_vector_3d(normal, view_vector) > 0 ? true : false;
 }
 
-void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color) {
+void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, screen_vertex v1, screen_vertex v2, screen_vertex v3, uint32_t color) {
 
     // compute 2D screen bounding box (clamped):
 
@@ -666,8 +665,8 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
     int min_x, max_x, min_y, max_y;
 
     // get max and min at the same time
-    minmax3f(x1, x2, x3, &min_x_f, &max_x_f);
-    minmax3f(y1, y2, y3, &min_y_f, &max_y_f);
+    minmax3f(v1.x, v2.x, v3.x, &min_x_f, &max_x_f);
+    minmax3f(v1.y, v2.y, v3.y, &min_y_f, &max_y_f);
 
     // discard triangles completely out of screen
     if (max_x_f < 0.0f || 
@@ -683,12 +682,12 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
     min_y = clampi((int) floorf(min_y_f), 0, p_buffer->height - 1);
     max_y = clampi((int) ceilf(max_y_f), 0, p_buffer->height - 1);
     //debug
-    // printf("1: %.1f %.1f; 2: %.1f %.1f; 3: %.1f %.1f\n", x1, y1, x2, y2, x3, y3);
+    // printf("1: %.1f %.1f; 2: %.1f %.1f; 3: %.1f %.1f\n", v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
     // printf("X: %i -> %i ; Y %i -> %i\n", min_x, max_x, min_y, max_y);
 
     // compute total triangle area * 2 (area of the full parallelogram, magnitude of 2d cross product):
 
-    float triangle_area_x2 = (x2 - x1)*(y3 - y1) - (y2 - y1)*(x3 - x1);
+    float triangle_area_x2 = (v2.x - v1.x)*(v3.y - v1.y) - (v2.y - v1.y)*(v3.x - v1.x);
     //debug
     // printf("AX2: %.1f\n", triangle_area_x2);
 
@@ -713,21 +712,21 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
     // if a triangle is in CCW order, point is inside if to the right of all edges (>= 0)
 
     //E23
-    float x3_minus_x2 = x3 - x2;
-    float y3_minus_y2 = y3 - y2;
+    float x3_minus_x2 = v3.x - v2.x;
+    float y3_minus_y2 = v3.y - v2.y;
 
     //E31
-    float x1_minus_x3 = x1 - x3;
-    float y1_minus_y3 = y1 - y3;
+    float x1_minus_x3 = v1.x - v3.x;
+    float y1_minus_y3 = v1.y - v3.y;
 
     //E12
-    float x2_minus_x1 = x2 - x1;
-    float y2_minus_y1 = y2 - y1;
+    float x2_minus_x1 = v2.x - v1.x;
+    float y2_minus_y1 = v2.y - v1.y;
 
     // edge function macros
-    #define EDGE23(x, y) ((((x) - x2) * y3_minus_y2) - (((y) - y2) * x3_minus_x2))
-    #define EDGE31(x, y) ((((x) - x3) * y1_minus_y3) - (((y) - y3) * x1_minus_x3))
-    #define EDGE12(x, y) ((((x) - x1) * y2_minus_y1) - (((y) - y1) * x2_minus_x1))
+    #define EDGE23(macro_x, macro_y) ((((macro_x) - v2.x) * y3_minus_y2) - (((macro_y) - v2.y) * x3_minus_x2))
+    #define EDGE31(macro_x, macro_y) ((((macro_x) - v3.x) * y1_minus_y3) - (((macro_y) - v3.y) * x1_minus_x3))
+    #define EDGE12(macro_x, macro_y) ((((macro_x) - v1.x) * y2_minus_y1) - (((macro_y) - v1.y) * x2_minus_x1))
 
     // loop over the bounding box:
 
@@ -737,9 +736,9 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
 
     // top left rule:
 
-    bool is_top_left_23 = ((y3 < y2) || (y3 == y2 && x3 < x2)) ? true : false; 
-    bool is_top_left_31 = ((y1 < y3) || (y1 == y3 && x1 < x3)) ? true : false; 
-    bool is_top_left_12 = ((y2 < y1) || (y2 == y1 && x2 < x1)) ? true : false; 
+    bool is_top_left_23 = ((v3.y < v2.y) || (v3.y == v2.y && v3.x < v2.x)) ? true : false; 
+    bool is_top_left_31 = ((v1.y < v3.y) || (v1.y == v3.y && v1.x < v3.x)) ? true : false; 
+    bool is_top_left_12 = ((v2.y < v1.y) || (v2.y == v1.y && v2.x < v1.x)) ? true : false; 
 
     for (int x = min_x; x <= max_x; x++)
     {
@@ -791,4 +790,47 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
     }
     //debug
     // printf("%i ", drew_at_least_once);
+}
+
+screen_vertex orthographic_projection(vertex_3d v3d) {
+
+    screen_vertex v2d;
+
+    v2d.x = v3d.x;
+    v2d.y = v3d.y;
+
+    v2d.z = v3d.z;
+
+    return v2d;
+}
+
+screen_vertex isometric_projection(vertex_3d v3d) {
+
+    // this projection is basically two rotations followed by an orthogonal projection
+
+    float sqrt2 = 1.4142135623730950488016887242097f;
+    float sqrt6 = 2.4494897427831780981972840747059f;
+
+    screen_vertex v2d;
+
+    v2d.x = (v3d.x - v3d.z) / sqrt2;
+    v2d.y = ((2*v3d.y) - v3d.x - v3d.z) / sqrt6;
+
+    v2d.z = v3d.z;
+
+    return v2d;
+}
+
+screen_vertex simplified_perspective_projection(vertex_3d v3d) {
+
+    // assuming a particular camera position, camera orientation and screen position
+
+    screen_vertex v2d;
+
+    v2d.x = v3d.x / ((-1)*v3d.z);
+    v2d.y = v3d.y / ((-1)*v3d.z);
+
+    v2d.z = v3d.z;
+
+    return v2d;
 }

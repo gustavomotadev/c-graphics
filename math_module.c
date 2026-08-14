@@ -1,15 +1,5 @@
 #include "math_module.h"
 
-vector_2d orthographic_projection(vector_3d v3d) {
-
-    vector_2d v2d;
-
-    v2d.x = v3d.x;
-    v2d.y = v3d.y;
-
-    return v2d;
-}
-
 vector_2d_int round_vector_2d(vector_2d v2d) {
 
     vector_2d_int v2di;
@@ -65,33 +55,6 @@ void translate_vector_3d(vector_3d* v3d, float dx, float dy, float dz) {
     v3d->x += dx;
     v3d->y += dy;
     v3d->z += dz;
-}
-
-vector_2d isometric_projection(vector_3d v3d) {
-
-    // this projection is basically two rotations followed by an orthogonal projection
-
-    float sqrt2 = 1.4142135623730950488016887242097f;
-    float sqrt6 = 2.4494897427831780981972840747059f;
-
-    vector_2d v2d;
-
-    v2d.x = (v3d.x - v3d.z) / sqrt2;
-    v2d.y = ((2*v3d.y) - v3d.x - v3d.z) / sqrt6;
-
-    return v2d;
-}
-
-vector_2d simplified_perspective_projection(vector_3d v3d) {
-
-    // assuming a particular camera position, camera orientation and screen position
-
-    vector_2d v2d;
-
-    v2d.x = v3d.x / ((-1)*v3d.z);
-    v2d.y = v3d.y / ((-1)*v3d.z);
-
-    return v2d;
 }
 
 bool compare_floats(float a, float b, float epsilon) {

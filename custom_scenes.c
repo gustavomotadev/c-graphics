@@ -89,8 +89,9 @@ void create_test_triangle(model* triangle) {
 
     triangle->vertexes_3d = (vertex_3d *) malloc(triangle->num_vertexes*sizeof(vertex_3d));
     triangle->vertexes_3d_transformed = (vertex_3d *) malloc(triangle->num_vertexes*sizeof(vertex_3d));
-    triangle->vertexes_2d = (vertex_2d *) malloc(triangle->num_vertexes*sizeof(vertex_2d));
-    triangle->pixels = (pixel *) malloc(triangle->num_vertexes*sizeof(pixel));
+    triangle->screen_vertexes = (screen_vertex *) malloc(triangle->num_vertexes*sizeof(screen_vertex));
+    // triangle->vertexes_2d = (vertex_2d *) malloc(triangle->num_vertexes*sizeof(vertex_2d));
+    // triangle->pixels = (pixel *) malloc(triangle->num_vertexes*sizeof(pixel));
     triangle->tri_faces = (triangle_face *) malloc(triangle->num_faces*sizeof(triangle_face));
     triangle->face_normals = (vector_3d *) malloc(triangle->num_faces*sizeof(vector_3d));
 
@@ -160,8 +161,9 @@ void create_test_cube(model* cube) {
 
     cube->vertexes_3d = (vertex_3d *) malloc(cube->num_vertexes*sizeof(vertex_3d));
     cube->vertexes_3d_transformed = (vertex_3d *) malloc(cube->num_vertexes*sizeof(vertex_3d));
-    cube->vertexes_2d = (vertex_2d *) malloc(cube->num_vertexes*sizeof(vertex_2d));
-    cube->pixels = (pixel *) malloc(cube->num_vertexes*sizeof(pixel));
+    cube->vertexes_3d_transformed = (screen_vertex *) malloc(cube->num_vertexes*sizeof(screen_vertex));
+    // cube->vertexes_2d = (vertex_2d *) malloc(cube->num_vertexes*sizeof(vertex_2d));
+    // cube->pixels = (pixel *) malloc(cube->num_vertexes*sizeof(pixel));
     cube->tri_faces = (triangle_face *) malloc(cube->num_faces*sizeof(triangle_face));
     cube->face_normals = (vector_3d *) malloc(cube->num_faces*sizeof(vector_3d));
 
@@ -321,8 +323,9 @@ void create_teapot(model* teapot) {
 
     teapot->vertexes_3d = (vertex_3d *) malloc(teapot->num_vertexes*sizeof(vertex_3d));
     teapot->vertexes_3d_transformed = (vertex_3d *) malloc(teapot->num_vertexes*sizeof(vertex_3d));
-    teapot->vertexes_2d = (vertex_2d *) malloc(teapot->num_vertexes*sizeof(vertex_2d));
-    teapot->pixels = (pixel *) malloc(teapot->num_vertexes*sizeof(pixel));
+    teapot->screen_vertexes = (screen_vertex *) malloc(teapot->num_vertexes*sizeof(screen_vertex));
+    // teapot->vertexes_2d = (vertex_2d *) malloc(teapot->num_vertexes*sizeof(vertex_2d));
+    // teapot->pixels = (pixel *) malloc(teapot->num_vertexes*sizeof(pixel));
     teapot->tri_faces = (triangle_face *) malloc(teapot->num_faces*sizeof(triangle_face));
     teapot->face_normals = (vector_3d *) malloc(teapot->num_faces*sizeof(vector_3d));
 
