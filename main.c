@@ -134,6 +134,7 @@ bool update_title(sdl_pointers* sdlp, char* title_buffer, size_t size, time_stat
 void clear_frame(pixel_buffer* p_buffer) {
 
     clear_color_buffer(p_buffer, 0x202020FF);
+    clear_depth_buffer(p_buffer);
 }
 
 void draw_frame(pixel_buffer* p_buffer, double delta_time, double total_time) {

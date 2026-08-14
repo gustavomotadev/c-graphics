@@ -15,6 +15,7 @@ typedef struct pixel_buffer {
     int width;
     int height;
     uint32_t* color_buffer;
+    float* depth_buffer;
 } pixel_buffer;
 
 typedef struct triangle_face {
@@ -48,6 +49,9 @@ bool setup_pixel_buffer(pixel_buffer* p_buffer, int width, int height);
 
 // clear the buffer with a single color
 void clear_color_buffer(pixel_buffer* p_buffer, uint32_t color);
+
+// clear the depth buffer with negative infinity
+void clear_depth_buffer(pixel_buffer* p_buffer);
 
 // draw a single point
 void draw_pixel(pixel_buffer* p_buffer, int x, int y, uint32_t color);
@@ -92,4 +96,4 @@ bool back_face_culling(vertex_3d p1, vertex_3d p2, vertex_3d p3, vector_3d norma
 
 void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color);
 
-#endif // GRAPHICS_MODULE_H
+#endif /* GRAPHICS_MODULE_H */

@@ -4,11 +4,19 @@ bool setup_pixel_buffer(pixel_buffer* p_buffer, int width, int height) {
 
     p_buffer->width = width;
     p_buffer->height = height;
-    // Allocate raw C array
+    // Allocate raw C arrays
     p_buffer->color_buffer = (uint32_t*) malloc(width * height * sizeof(uint32_t));
     if (!p_buffer->color_buffer) {
         return false;
     }
+    p_buffer->depth_buffer = (float*) malloc(width * height * sizeof(float));
+    if (!p_buffer->depth_buffer) {
+        return false;
+    }
+
+    clear_color_buffer(p_buffer, 0x000000FF);
+
+    clear_depth_buffer(p_buffer);
 
     return true;
 }
@@ -17,6 +25,12 @@ bool setup_pixel_buffer(pixel_buffer* p_buffer, int width, int height) {
 void clear_color_buffer(pixel_buffer* p_buffer, uint32_t color) {
     for (int i = 0; i < p_buffer->width * p_buffer->height; i++) {
         p_buffer->color_buffer[i] = color;
+    }
+}
+
+void clear_depth_buffer(pixel_buffer* p_buffer) {
+    for (int i = 0; i < p_buffer->width * p_buffer->height; i++) {
+        p_buffer->depth_buffer[i] = -INFINITY;
     }
 }
 
