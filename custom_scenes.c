@@ -82,6 +82,42 @@ void lines_bresenham_all_octants(pixel_buffer* p_buffer, double delta_time, doub
 
 }
 
+void create_test_triangle(model* triangle) {
+
+    triangle->num_vertexes = 3;
+    triangle->num_faces = 1;
+
+    triangle->vertexes_3d = (vertex_3d *) malloc(triangle->num_vertexes*sizeof(vertex_3d));
+    triangle->vertexes_3d_transformed = (vertex_3d *) malloc(triangle->num_vertexes*sizeof(vertex_3d));
+    triangle->vertexes_2d = (vertex_2d *) malloc(triangle->num_vertexes*sizeof(vertex_2d));
+    triangle->pixels = (pixel *) malloc(triangle->num_vertexes*sizeof(pixel));
+    triangle->tri_faces = (triangle_face *) malloc(triangle->num_faces*sizeof(triangle_face));
+    triangle->face_normals = (vector_3d *) malloc(triangle->num_faces*sizeof(vector_3d));
+
+    // static float x1 = 300.0f;
+    // static float y1 = 300.0f;
+    // static float x2 = 500.0f;
+    // static float y2 = 300.0f;
+    // static float x3 = 400.0f;
+    // static float y3 = 500.0f;
+
+    triangle->vertexes_3d[0].x = -0.5f;
+    triangle->vertexes_3d[0].y = -0.5f;
+    triangle->vertexes_3d[0].z = 0.0f;
+    triangle->vertexes_3d[1].x = 0.5f;
+    triangle->vertexes_3d[1].y = -0.5f;
+    triangle->vertexes_3d[1].z = 0.0f;
+    triangle->vertexes_3d[2].x = 0.0f;
+    triangle->vertexes_3d[2].y = 0.5f;
+    triangle->vertexes_3d[2].z = 0.0f;
+
+    reset_model_transform(triangle);
+
+    triangle->tri_faces[0].a = 0;
+    triangle->tri_faces[0].b = 1;
+    triangle->tri_faces[0].c = 2;
+}
+
 void create_test_cube(model* cube) {
 
     /*
@@ -1519,6 +1555,7 @@ void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_ti
 
     create_teapot(&my_model);
     // create_test_cube(&my_model);
+    // create_test_triangle(&my_model);
 
     reset_model_transform(&my_model);
     rotate_model(&my_model, x_value, y_value, z_value);
@@ -1532,4 +1569,30 @@ void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_ti
     // draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
 
     free_model_data(&my_model);
+
+    // --- new test ---
+
+    // static double last_time = -1.0f;
+
+    // static float x1 = 300.0f;
+    // static float y1 = 300.0f;
+    // static float x2 = 500.0f;
+    // static float y2 = 300.0f;
+    // static float x3 = 400.0f;
+    // static float y3 = 500.0f;
+
+    // double interval = 0.25f;
+
+    // if (total_time > last_time + interval) {
+    //     last_time = total_time;
+
+    //     x1 = rand()%400 - 200.0f + (p_buffer->width/2.0f);
+    //     x2 = rand()%400 - 200.0f + (p_buffer->width/2.0f);
+    //     x3 = rand()%400 - 200.0f + (p_buffer->width/2.0f);
+    //     y1 = rand()%400 - 200.0f + (p_buffer->height/2.0f);
+    //     y2 = rand()%400 - 200.0f + (p_buffer->height/2.0f);
+    //     y3 = rand()%400 - 200.0f + (p_buffer->height/2.0f);
+    // }
+
+    // rasterize_triangle_edge_functions(p_buffer, x1, y1, x2, y2, x3, y3, 0xFF0000FF);
 }

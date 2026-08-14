@@ -674,14 +674,20 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
 
     // compute total triangle area * 2 (area of the full parallelogram, magnitude of 2d cross product):
 
-    float triangle_area_x2 = (x2 - x1)*(x3 - x1) - (y2 - y1)*(y3 - y1);
+    float triangle_area_x2 = (x2 - x1)*(y3 - y1) - (y2 - y1)*(x3 - x1);
     //debug
     // printf("AX2: %.1f\n", triangle_area_x2);
+
+    //debug
+    // printf("PRE-AX2 ");
 
     // if area <= 0 the triangle is degenerate or flipped (back facing)
     if (lesser_equal_floats(triangle_area_x2, 0.0f, DEFAULT_EPSILON)) {
         return;
     }
+
+    //debug
+    // printf("POST-AX2 ");
 
     //debug
     // printf("AX2: %.1f\n", triangle_area_x2);
@@ -711,6 +717,10 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
 
     // loop over the bounding box:
 
+    //debug
+    // bool drew_at_least_once = false;
+    // printf("PRE-LOOP ");
+
     for (int x = min_x; x <= max_x; x++)
     {
         for (int y = min_y; y <= max_y; y++)
@@ -737,11 +747,17 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
             //     continue;
             // }
 
-            if (((edge23 >= 0) && (edge31 >= 0) && (edge12 >= 0))) {
-                draw_pixel(p_buffer, x, y, 0xFF0000FF);
-            }
+            // if (((edge23 >= 0) && (edge31 >= 0) && (edge12 >= 0))) {
+            //     //debug
+            //     // printf(">= %i %i\n", x, y);
+            //     draw_pixel(p_buffer, x, y, 0xFF0000FF);
+            //     // drew_at_least_once = true;
+            // }
             if (((edge23 <= 0) && (edge31 <= 0) && (edge12 <= 0))) {
-                draw_pixel(p_buffer, x, y, 0x00FF00FF);
+                //debug
+                // printf("<= %i %i\n", x, y);
+                draw_pixel(p_buffer, x, y, color);
+                // drew_at_least_once = true;
             }
 
             // printf("PIXEL DRAW!\n");
@@ -750,5 +766,6 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y
         }
         
     }
-    
+    //debug
+    // printf("%i ", drew_at_least_once);
 }
