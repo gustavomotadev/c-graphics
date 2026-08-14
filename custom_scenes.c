@@ -127,6 +127,7 @@ void create_test_cube(model* cube) {
     cube->vertexes_2d = (vertex_2d *) malloc(cube->num_vertexes*sizeof(vertex_2d));
     cube->pixels = (pixel *) malloc(cube->num_vertexes*sizeof(pixel));
     cube->tri_faces = (triangle_face *) malloc(cube->num_faces*sizeof(triangle_face));
+    cube->face_normals = (vector_3d *) malloc(cube->num_faces*sizeof(vector_3d));
 
     // 0 -1.0 -1.0  1.0
     // 1  1.0 -1.0  1.0
@@ -1493,4 +1494,42 @@ void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, d
     // draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
 
     free_model_data(&teapot);
+}
+
+void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_time, double total_time) {
+
+    srand(time(NULL));
+
+    model my_model;
+    double pi = 3.14159265358979323846f;
+    // float deg90 = 3.14159265358979323846f/2.0f;
+
+    //larger is slower
+    double x_speed_factor = 20.0;
+    double y_speed_factor = 10.0;
+    double z_speed_factor = 40.0;
+    // turn total time into 0..1 interval
+    double x_value = (total_time - ((int) (total_time/x_speed_factor))*x_speed_factor)/x_speed_factor;
+    double y_value = (total_time - ((int) (total_time/y_speed_factor))*y_speed_factor)/y_speed_factor;
+    double z_value = (total_time - ((int) (total_time/z_speed_factor))*z_speed_factor)/z_speed_factor;
+    // turn 0..1 into 0..2pi
+    x_value = x_value*2.0*pi;
+    y_value = y_value*2.0*pi;
+    z_value = z_value*2.0*pi;
+
+    create_teapot(&my_model);
+    // create_test_cube(&my_model);
+
+    reset_model_transform(&my_model);
+    rotate_model(&my_model, x_value, y_value, z_value);
+    // rotate_model(&cube, -x_value, 0.0f, 0.0f);
+    // rotate_model(&cube, 0.0f, 0.0f, -z_value);
+    
+    scale_model(&my_model, 0.75f, 0.75f, 0.75f);
+    translate_model(&my_model, 0.0f, 0.0f, -1.0f);
+
+    draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
+    // draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
+
+    free_model_data(&my_model);
 }

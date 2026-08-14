@@ -72,6 +72,8 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
 
 void draw_model_scanlines(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color);
 
+void draw_model_edge_functions(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color);
+
 void scale_model(model* md, float factor_x, float factor_y, float factor_z);
 
 void rotate_model(model* md, float angle_x, float angle_y, float angle_z);
@@ -87,5 +89,7 @@ void compute_face_normals(model* md);
 uint32_t map_normal_to_color(vector_3d v3d);
 
 bool back_face_culling(vertex_3d p1, vertex_3d p2, vertex_3d p3, vector_3d normal);
+
+void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color);
 
 #endif // GRAPHICS_MODULE_H

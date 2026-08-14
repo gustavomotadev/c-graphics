@@ -246,13 +246,13 @@ void draw_model(pixel_buffer* p_buffer, model* md, projection_function project, 
 
     for (int i = 0; i < md->num_faces; i++)
     {
-        if (!back_face_culling(
-                md->vertexes_3d_transformed[md->tri_faces[i].a], 
-                md->vertexes_3d_transformed[md->tri_faces[i].b], 
-                md->vertexes_3d_transformed[md->tri_faces[i].c], 
-                md->face_normals[i])) {
-            continue;
-        }
+        // if (!back_face_culling(
+        //         md->vertexes_3d_transformed[md->tri_faces[i].a], 
+        //         md->vertexes_3d_transformed[md->tri_faces[i].b], 
+        //         md->vertexes_3d_transformed[md->tri_faces[i].c], 
+        //         md->face_normals[i])) {
+        //     continue;
+        // }
         
         // debug
         // uint32_t rand_color =  ((uint32_t)(rand() & 0xFFFF) << 16) | ((uint32_t)(rand() & 0xFFFF)) | 0xFF;
@@ -280,6 +280,10 @@ void draw_model_wireframe(pixel_buffer* p_buffer, model* md, projection_function
 
 void draw_model_scanlines(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color) {
     draw_model(p_buffer, md, project, rasterize_triangle_scanline, color);
+}
+
+void draw_model_edge_functions(pixel_buffer* p_buffer, model* md, projection_function project, uint32_t color) {
+    draw_model(p_buffer, md, project, rasterize_triangle_edge_functions, color);
 }
 
 void scale_model(model* md, float factor_x, float factor_y, float factor_z) {
@@ -638,4 +642,113 @@ bool back_face_culling(vertex_3d p1, vertex_3d p2, vertex_3d p3, vector_3d norma
     // normalizing the view vector is not necessary for culling
 
     return dot_product_vector_3d(normal, view_vector) > 0 ? true : false;
+}
+
+void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t color) {
+
+    // compute 2D screen bounding box (clamped):
+
+    float min_x_f, max_x_f, min_y_f, max_y_f;
+    int min_x, max_x, min_y, max_y;
+
+    // get max and min at the same time
+    minmax3f(x1, x2, x3, &min_x_f, &max_x_f);
+    minmax3f(y1, y2, y3, &min_y_f, &max_y_f);
+
+    // discard triangles completely out of screen
+    if (max_x_f < 0.0f || 
+        min_x_f >= p_buffer->width ||
+        max_y_f < 0.0f ||
+        min_y_f >= p_buffer->height) {
+            return;
+        }
+
+    // apply floor or ceil and clamp to screen
+    min_x = clampi((int) floorf(min_x_f), 0, p_buffer->width - 1);
+    max_x = clampi((int) ceilf(max_x_f), 0, p_buffer->width - 1);
+    min_y = clampi((int) floorf(min_y_f), 0, p_buffer->height - 1);
+    max_y = clampi((int) ceilf(max_y_f), 0, p_buffer->height - 1);
+    //debug
+    // printf("1: %.1f %.1f; 2: %.1f %.1f; 3: %.1f %.1f\n", x1, y1, x2, y2, x3, y3);
+    // printf("X: %i -> %i ; Y %i -> %i\n", min_x, max_x, min_y, max_y);
+
+    // compute total triangle area * 2 (area of the full parallelogram, magnitude of 2d cross product):
+
+    float triangle_area_x2 = (x2 - x1)*(x3 - x1) - (y2 - y1)*(y3 - y1);
+    //debug
+    // printf("AX2: %.1f\n", triangle_area_x2);
+
+    // if area <= 0 the triangle is degenerate or flipped (back facing)
+    if (lesser_equal_floats(triangle_area_x2, 0.0f, DEFAULT_EPSILON)) {
+        return;
+    }
+
+    //debug
+    // printf("AX2: %.1f\n", triangle_area_x2);
+
+    // edge functions (E23, E31, E12):
+    // evaluates which side of the edge a point is on
+    // is the 2d cross product: (V1-V0) X (P - V0) ; (signed area of the parallelogram)
+    // > 0 right ; = 0 on edge ; < 0 left
+    // if a triangle is in CCW order, point is inside if to the right of all edges (>= 0)
+
+    //E23
+    float x3_minus_x2 = x3 - x2;
+    float y3_minus_y2 = y3 - y2;
+
+    //E31
+    float x1_minus_x3 = x1 - x3;
+    float y1_minus_y3 = y1 - y3;
+
+    //E12
+    float x2_minus_x1 = x2 - x1;
+    float y2_minus_y1 = y2 - y1;
+
+    // edge function macros
+    #define EDGE23(x, y) ((((x) - x2) * y3_minus_y2) - (((y) - y2) * x3_minus_x2))
+    #define EDGE31(x, y) ((((x) - x3) * y1_minus_y3) - (((y) - y3) * x1_minus_x3))
+    #define EDGE12(x, y) ((((x) - x1) * y2_minus_y1) - (((y) - y1) * x2_minus_x1))
+
+    // loop over the bounding box:
+
+    for (int x = min_x; x <= max_x; x++)
+    {
+        for (int y = min_y; y <= max_y; y++)
+        {   
+            // pixel center
+            float x_center = x + 0.5f;
+            float y_center = y + 0.5f;
+
+            // if any result is not >= 0, ignore this point
+            float edge23 = EDGE23(x_center, y_center);
+            //debug
+            // printf("[1] E23: %.1f\n", edge23);
+            // if (edge23 < 0) {
+            //     continue;
+            // }
+            float edge31 = EDGE31(x_center, y_center);
+            // printf("[2] E31: %.1f\n", edge31);
+            // if (edge31 < 0) {
+            //     continue;
+            // }
+            float edge12 = EDGE12(x_center, y_center);
+            // printf("[3] E12: %.1f\n", edge12);
+            // if (edge12 < 0) {
+            //     continue;
+            // }
+
+            if (((edge23 >= 0) && (edge31 >= 0) && (edge12 >= 0))) {
+                draw_pixel(p_buffer, x, y, 0xFF0000FF);
+            }
+            if (((edge23 <= 0) && (edge31 <= 0) && (edge12 <= 0))) {
+                draw_pixel(p_buffer, x, y, 0x00FF00FF);
+            }
+
+            // printf("PIXEL DRAW!\n");
+
+            // draw_pixel(p_buffer, x, y, color);
+        }
+        
+    }
+    
 }

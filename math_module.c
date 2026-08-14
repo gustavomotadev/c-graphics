@@ -99,6 +99,19 @@ bool compare_floats(float a, float b, float epsilon) {
     return fabsf(a - b) < epsilon ? true : false;
 }
 
+bool lesser_equal_floats(float first, float second, float epsilon) {
+
+    if (first < second) {
+        return true;
+    }
+
+    if (fabsf(first - second) < epsilon) {
+        return true;
+    }
+
+    return false;
+}
+
 vector_3d subtract_vector_3d(vector_3d first, vector_3d second) {
     vector_3d result;
 
@@ -174,4 +187,30 @@ vector_3d compute_triangle_centroid(vector_3d p1, vector_3d p2, vector_3d p3) {
     centroid.z = (p1.z + p2.z + p3.z)/3;
 
     return centroid;
+}
+
+float clampf(float val, float min, float max) {
+    return val < min ? min : (val > max ? max : val);
+}
+
+int clampi(int val, int min, int max) {
+    return val < min ? min : (val > max ? max : val);
+}
+
+float min3f(float a, float b, float c) {
+    return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
+}
+
+float max3f(float a, float b, float c) {
+    return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
+}
+
+void minmax3f(float a, float b, float c, float *min, float *max) {
+    if (a > b) {
+        *max = (a > c) ? a : c;
+        *min = (b < c) ? b : c;
+    } else {
+        *max = (b > c) ? b : c;
+        *min = (a < c) ? a : c;
+    }
 }

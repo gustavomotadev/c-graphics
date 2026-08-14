@@ -22,4 +22,6 @@ void simplified_perspective_teapot(pixel_buffer* p_buffer, double delta_time, do
 
 void rasterization_scanlines_teapot(pixel_buffer* p_buffer, double delta_time, double total_time);
 
+void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_time, double total_time);
+
 #endif // SCENES_MODULE_H
