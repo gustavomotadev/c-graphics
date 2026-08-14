@@ -30,7 +30,8 @@ void clear_color_buffer(pixel_buffer* p_buffer, uint32_t color) {
 
 void clear_depth_buffer(pixel_buffer* p_buffer) {
     for (int i = 0; i < p_buffer->width * p_buffer->height; i++) {
-        p_buffer->depth_buffer[i] = -INFINITY;
+        //clearing with zero because I'm using reciprocal depth
+        p_buffer->depth_buffer[i] = 0.0f;
     }
 }
 
@@ -45,6 +46,28 @@ void draw_pixel(pixel_buffer* p_buffer, int x, int y, uint32_t color) {
     if (x >= 0 && x < p_buffer->width && y >= 0 && y < p_buffer->height) {
         p_buffer->color_buffer[xy_to_p_buffer(p_buffer, x, y)] = color; 
     }
+}
+
+void update_depth_buffer(pixel_buffer* p_buffer, int x, int y, float reciprocal_depth) {
+    // Prevent out-of-bounds memory writes (bounds checking)
+    if (x >= 0 && x < p_buffer->width && y >= 0 && y < p_buffer->height) {
+        p_buffer->depth_buffer[xy_to_p_buffer(p_buffer, x, y)] = reciprocal_depth; 
+    }
+}
+
+bool depth_test(pixel_buffer* p_buffer, int x, int y, float reciprocal_depth) {
+    // Prevent out-of-bounds memory writes (bounds checking)
+    if (x < 0 || x > (p_buffer->width - 1) || y < 0 || y > (p_buffer->height - 1)) {
+        return false;
+    }
+
+    // reciprocal depth is zero at infinity and becomes more negative closer to the screen
+    // if buffer is more negative than received value, buffer is closer
+    if (p_buffer->depth_buffer[xy_to_p_buffer(p_buffer, x, y)] < reciprocal_depth) {
+        return false;
+    }
+
+    return true;
 }
 
 // draw line using Digital differential analyzer algorithm
@@ -784,6 +807,27 @@ void rasterize_triangle_edge_functions(pixel_buffer* p_buffer, screen_vertex v1,
 
             // printf("PIXEL DRAW!\n");
 
+            // depth test:
+
+            // barycentric coordinates from edge functions and areaX2
+            // multiplying by -1 to ensure they all sum to +1.0 (so as to not mess other stuff)
+            float lambda1 = -1.0f * (edge23/triangle_area_x2);
+            float lambda2 = -1.0f * (edge31/triangle_area_x2);
+            float lambda3 = -1.0f * (edge12/triangle_area_x2);
+
+            // printf("%.1f ", lambda1 + lambda2 + lambda3);
+            // printf("E23: %.1f; E31: %.1f; E12: %.1f; AX2: %.1f\n", edge23, edge31, edge12, triangle_area_x2);
+
+            // reciprocal depth
+            float reciprocal_depth = (lambda1 * (1.0f / v1.z)) + (lambda2 * (1.0f / v2.z)) + (lambda3 * (1.0f / v3.z));
+            // printf("[1/Z] %f\n", reciprocal_depth);
+
+            //actual depth test
+            if(!depth_test(p_buffer, x, y, reciprocal_depth)) {
+                continue;
+            }
+
+            update_depth_buffer(p_buffer, x, y, reciprocal_depth);
             draw_pixel(p_buffer, x, y, color);
         }
         

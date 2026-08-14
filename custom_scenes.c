@@ -161,7 +161,7 @@ void create_test_cube(model* cube) {
 
     cube->vertexes_3d = (vertex_3d *) malloc(cube->num_vertexes*sizeof(vertex_3d));
     cube->vertexes_3d_transformed = (vertex_3d *) malloc(cube->num_vertexes*sizeof(vertex_3d));
-    cube->vertexes_3d_transformed = (screen_vertex *) malloc(cube->num_vertexes*sizeof(screen_vertex));
+    cube->screen_vertexes = (screen_vertex *) malloc(cube->num_vertexes*sizeof(screen_vertex));
     // cube->vertexes_2d = (vertex_2d *) malloc(cube->num_vertexes*sizeof(vertex_2d));
     // cube->pixels = (pixel *) malloc(cube->num_vertexes*sizeof(pixel));
     cube->tri_faces = (triangle_face *) malloc(cube->num_faces*sizeof(triangle_face));
@@ -1540,6 +1540,8 @@ void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_ti
     srand(time(NULL));
 
     model my_model;
+    model my_model2;
+    // model my_model3;
     double pi = 3.14159265358979323846f;
     // float deg90 = 3.14159265358979323846f/2.0f;
 
@@ -1557,45 +1559,39 @@ void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_ti
     z_value = z_value*2.0*pi;
 
     create_teapot(&my_model);
-    // create_test_cube(&my_model);
-    // create_test_triangle(&my_model);
+    create_test_cube(&my_model2);
+    // create_test_triangle(&my_model3);
 
-    reset_model_transform(&my_model);
+    // reset_model_transform(&my_model);
     rotate_model(&my_model, x_value, y_value, z_value);
     // rotate_model(&cube, -x_value, 0.0f, 0.0f);
     // rotate_model(&cube, 0.0f, 0.0f, -z_value);
     
-    scale_model(&my_model, 0.75f, 0.75f, 0.75f);
+    scale_model(&my_model, 0.8f, 0.8f, 0.8f);
     translate_model(&my_model, 0.0f, 0.0f, -1.0f);
 
     draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
     // draw_model_wireframe(p_buffer, &teapot, simplified_perspective_projection, 0xFFFFFFFF);
 
+    // drawing more stuff
+
+    rotate_model(&my_model2, x_value, y_value, z_value);
+    scale_model(&my_model2, 0.5f, 0.5f, 0.5f);
+    translate_model(&my_model2, 0.75f, 0.75f, -2.5f);
+    draw_model_edge_functions(p_buffer, &my_model2, simplified_perspective_projection, 0x0000FFFF);
+    
+    scale_model(&my_model2, 0.125f, 0.125f, 0.125f);
+    translate_model(&my_model2, -0.2f, -0.2f, 0.15f);
+    draw_model_edge_functions(p_buffer, &my_model2, simplified_perspective_projection, 0x0000FFFF);
+
+    translate_model(&my_model, -0.75f, 0.75f, -0.5f);
+    draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
+
+    scale_model(&my_model, 0.4f, 0.4f, 0.4f);
+    translate_model(&my_model, 0.6f, -0.6f, 0.3f);
+    draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
+
     free_model_data(&my_model);
-
-    // --- new test ---
-
-    // static double last_time = -1.0f;
-
-    // static float x1 = 300.0f;
-    // static float y1 = 300.0f;
-    // static float x2 = 500.0f;
-    // static float y2 = 300.0f;
-    // static float x3 = 400.0f;
-    // static float y3 = 500.0f;
-
-    // double interval = 0.25f;
-
-    // if (total_time > last_time + interval) {
-    //     last_time = total_time;
-
-    //     x1 = rand()%400 - 200.0f + (p_buffer->width/2.0f);
-    //     x2 = rand()%400 - 200.0f + (p_buffer->width/2.0f);
-    //     x3 = rand()%400 - 200.0f + (p_buffer->width/2.0f);
-    //     y1 = rand()%400 - 200.0f + (p_buffer->height/2.0f);
-    //     y2 = rand()%400 - 200.0f + (p_buffer->height/2.0f);
-    //     y3 = rand()%400 - 200.0f + (p_buffer->height/2.0f);
-    // }
-
-    // rasterize_triangle_edge_functions(p_buffer, x1, y1, x2, y2, x3, y3, 0xFF0000FF);
+    free_model_data(&my_model2);
+    // free_model_data(&my_model3);
 }

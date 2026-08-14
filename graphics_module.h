@@ -104,4 +104,8 @@ screen_vertex isometric_projection(vertex_3d v3d);
 
 screen_vertex simplified_perspective_projection(vertex_3d v3d);
 
+void update_depth_buffer(pixel_buffer* p_buffer, int x, int y, float reciprocal_depth);
+
+bool depth_test(pixel_buffer* p_buffer, int x, int y, float reciprocal_depth);
+
 #endif /* GRAPHICS_MODULE_H */
