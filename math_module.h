@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #define DEFAULT_EPSILON 0.0001f
 
@@ -21,6 +22,19 @@ typedef struct vector_2d_int {
     int x;
     int y;
 } vector_2d_int;
+
+// column major
+typedef union matrix_4d {
+    float m[16];
+    float m_cl[4][4];
+} matrix_4d;
+
+typedef struct vector_4d {
+    float x;
+    float y;
+    float z;
+    float w;
+} vector_4d;
 
 vector_2d_int round_vector_2d(vector_2d v2d);
 
@@ -59,5 +73,11 @@ float min3f(float a, float b, float c);
 float max3f(float a, float b, float c);
 
 void minmax3f(float a, float b, float c, float *min, float *max);
+
+matrix_4d multiply_matrix_4d(matrix_4d left, matrix_4d right);
+
+vector_4d multiply_matrix_vector_4d(matrix_4d m4d, vector_4d v4d);
+
+void print_matrix_4d(matrix_4d m4d);
 
 #endif // MATH_MODULE_H

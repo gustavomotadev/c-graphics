@@ -177,3 +177,45 @@ void minmax3f(float a, float b, float c, float *min, float *max) {
         *min = (a < c) ? a : c;
     }
 }
+
+matrix_4d multiply_matrix_4d(matrix_4d left, matrix_4d right) {
+
+    matrix_4d result;
+
+    for (int c = 0; c < 4; c++)
+    {
+        for (int l = 0; l < 4; l++)
+        {
+            // column c line l
+            result.m_cl[c][l] = left.m_cl[0][l]*right.m_cl[c][0] + left.m_cl[1][l]*right.m_cl[c][1] + left.m_cl[2][l]*right.m_cl[c][2] + left.m_cl[3][l]*right.m_cl[c][3];
+        }
+        
+    }
+
+    return result;
+}
+
+vector_4d multiply_matrix_vector_4d(matrix_4d m4d, vector_4d v4d) {
+
+    vector_4d result;
+
+    result.x = m4d.m_cl[0][0]*v4d.x + m4d.m_cl[1][0]*v4d.y + m4d.m_cl[2][0]*v4d.z + m4d.m_cl[3][0]*v4d.w;
+    result.y = m4d.m_cl[0][1]*v4d.x + m4d.m_cl[1][1]*v4d.y + m4d.m_cl[2][1]*v4d.z + m4d.m_cl[3][1]*v4d.w;
+    result.z = m4d.m_cl[0][2]*v4d.x + m4d.m_cl[1][2]*v4d.y + m4d.m_cl[2][2]*v4d.z + m4d.m_cl[3][2]*v4d.w;
+    result.w = m4d.m_cl[0][3]*v4d.x + m4d.m_cl[1][3]*v4d.y + m4d.m_cl[2][3]*v4d.z + m4d.m_cl[3][3]*v4d.w;
+
+    return result;
+}
+
+void print_matrix_4d(matrix_4d m4d) {
+
+    for (int l = 0; l < 4; l++)
+    {
+        printf("| ");
+        for (int c = 0; c < 4; c++)
+        {
+            printf("%5.1f ", m4d.m_cl[c][l]);
+        }
+        printf("|\n");
+    }
+}

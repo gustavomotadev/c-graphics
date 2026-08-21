@@ -1540,7 +1540,7 @@ void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_ti
     srand(time(NULL));
 
     model my_model;
-    model my_model2;
+    // model my_model2;
     // model my_model3;
     double pi = 3.14159265358979323846f;
     // float deg90 = 3.14159265358979323846f/2.0f;
@@ -1559,7 +1559,7 @@ void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_ti
     z_value = z_value*2.0*pi;
 
     create_teapot(&my_model);
-    create_test_cube(&my_model2);
+    // create_test_cube(&my_model2);
     // create_test_triangle(&my_model3);
 
     // reset_model_transform(&my_model);
@@ -1575,23 +1575,66 @@ void rasterization_edge_functions_teapot(pixel_buffer* p_buffer, double delta_ti
 
     // drawing more stuff
 
-    rotate_model(&my_model2, x_value, y_value, z_value);
-    scale_model(&my_model2, 0.5f, 0.5f, 0.5f);
-    translate_model(&my_model2, 0.75f, 0.75f, -2.5f);
-    draw_model_edge_functions(p_buffer, &my_model2, simplified_perspective_projection, 0x0000FFFF);
+    // rotate_model(&my_model2, x_value, y_value, z_value);
+    // scale_model(&my_model2, 0.5f, 0.5f, 0.5f);
+    // translate_model(&my_model2, 0.75f, 0.75f, -2.5f);
+    // draw_model_edge_functions(p_buffer, &my_model2, simplified_perspective_projection, 0x0000FFFF);
     
-    scale_model(&my_model2, 0.125f, 0.125f, 0.125f);
-    translate_model(&my_model2, -0.2f, -0.2f, 0.15f);
-    draw_model_edge_functions(p_buffer, &my_model2, simplified_perspective_projection, 0x0000FFFF);
+    // scale_model(&my_model2, 0.125f, 0.125f, 0.125f);
+    // translate_model(&my_model2, -0.2f, -0.2f, 0.15f);
+    // draw_model_edge_functions(p_buffer, &my_model2, simplified_perspective_projection, 0x0000FFFF);
 
-    translate_model(&my_model, -0.75f, 0.75f, -0.5f);
-    draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
+    // translate_model(&my_model, -0.75f, 0.75f, -0.5f);
+    // draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
 
-    scale_model(&my_model, 0.4f, 0.4f, 0.4f);
-    translate_model(&my_model, 0.6f, -0.6f, 0.3f);
-    draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
+    // scale_model(&my_model, 0.4f, 0.4f, 0.4f);
+    // translate_model(&my_model, 0.6f, -0.6f, 0.3f);
+    // draw_model_edge_functions(p_buffer, &my_model, simplified_perspective_projection, 0x0000FFFF);
+
+    // free stuff
 
     free_model_data(&my_model);
-    free_model_data(&my_model2);
+    // free_model_data(&my_model2);
     // free_model_data(&my_model3);
+
+    // debug
+    matrix_4d m1;
+    m1.m_cl[0][0] = 1;
+    m1.m_cl[1][0] = 2;
+    m1.m_cl[2][0] = 3;
+    m1.m_cl[3][0] = 4;
+    m1.m_cl[0][1] = 0;
+    m1.m_cl[1][1] = 1;
+    m1.m_cl[2][1] = 0;
+    m1.m_cl[3][1] = 1;
+    m1.m_cl[0][2] = 2;
+    m1.m_cl[1][2] = -1;
+    m1.m_cl[2][2] = -2;
+    m1.m_cl[3][2] = -3;
+    m1.m_cl[0][3] = 0;
+    m1.m_cl[1][3] = 2;
+    m1.m_cl[2][3] = 0;
+    m1.m_cl[3][3] = 2;
+    matrix_4d m2;
+    m2.m_cl[0][0] = 1;
+    m2.m_cl[1][0] = 0;
+    m2.m_cl[2][0] = 2;
+    m2.m_cl[3][0] = 0;
+    m2.m_cl[0][1] = 0;
+    m2.m_cl[1][1] = 1;
+    m2.m_cl[2][1] = -5;
+    m2.m_cl[3][1] = 2;
+    m2.m_cl[0][2] = 0;
+    m2.m_cl[1][2] = 0;
+    m2.m_cl[2][2] = -8;
+    m2.m_cl[3][2] = 0;
+    m2.m_cl[0][3] = 0;
+    m2.m_cl[1][3] = 0;
+    m2.m_cl[2][3] = 0;
+    m2.m_cl[3][3] = 0;
+    matrix_4d m3;
+
+    m3 = multiply_matrix_4d(m1, m2);
+    print_matrix_4d(m3);
+    printf("\n");
 }
